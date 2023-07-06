@@ -1,10 +1,7 @@
 {
-  "name": "Workspaces indicator by open apps",
-  "description": "Display a simple workspace indicator showing icons of apps open in it",
-  "uuid": "workspaces-by-open-apps@favo02.github.com",
-  "url": "https://github.com/Favo02/workspaces-by-open-apps",
-  "version": "6",
-  "shell-version": [
-    "44"
-  ]
+  "name": "Workspace Gnome (Snilcy )",
+  "description": "Display a simple workspace",
+  "uuid": "workspace@snilcy.github.io",
+  "version": 1,
+  "shell-version": ["44"]
 }
