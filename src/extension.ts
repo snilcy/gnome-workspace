@@ -1,5 +1,3 @@
-'use strict';
-
 const {
   Clutter,
   St,
@@ -17,20 +15,45 @@ const {
   Cairo,
   Me,
   Log,
+  GObject,
+  Config,
 } = imports.misc.extensionUtils.getCurrentExtension().imports.api;
 
 // initialize extension
 function init() {
-  Log('init');
+  Log('init NEW 2');
   return new WorkspaceIndicator();
 }
+
+const Signals = [
+  {
+    namespace: global.workspace_manager,
+    signals: [
+      'notify::n-workspaces', // add/remove workspace
+      'workspace-switched', // change active workspace
+      'workspaces-reordered', // reorder workspaces
+    ],
+    listeners: [],
+  },
+  {
+    namespace: Shell.WindowTracker.get_default(),
+    signals: ['tracked-windows-changed'],
+    listeners: [],
+  },
+  {
+    namespace: global.display,
+    signals: ['restacked', 'window-left-monitor', 'window-entered-monitor'],
+    listeners: [],
+  },
+];
+// this.refresh.bind(this)
 
 // extension workspace indicator
 class WorkspaceIndicator {
   constructor() {}
 
   enable() {
-    Log('enable');
+    Log('enable NEW 3');
     // this._settings = imports.misc.extensionUtils.getSettings(
     //   'org.gnome.shell.extensions.workspace-gnome',
     // );
@@ -38,7 +61,7 @@ class WorkspaceIndicator {
     // this._workspacesIndicators = [];
     // this._hasOtherMonitor = false;
 
-    // this.connectSignals(); // signals that triggers refresh()
+    this.connectSignals(); // signals that triggers refresh()
     // this.refresh(); // initialize indicator
   }
 
@@ -54,51 +77,20 @@ class WorkspaceIndicator {
   }
 
   connectSignals() {
-    // signals for global.workspace_manager
-    this._workspaceNumberChangedSIGNAL = global.workspace_manager.connect(
-      'notify::n-workspaces', // add/remove workspace
-      this.refresh.bind(this),
-    );
-    this._workspaceSwitchedSIGNAL = global.workspace_manager.connect(
-      'workspace-switched', // change active workspace
-      this.refresh.bind(this),
-    );
-    this._workspaceReorderedSIGNAL = global.workspace_manager.connect(
-      'workspaces-reordered', // reorder workspaces
-      this.refresh.bind(this),
-    );
-
-    // signals for Shell.WindowTracker.get_default()
-    this._windowsChangedSIGNAL = Shell.WindowTracker.get_default().connect(
-      'tracked-windows-changed',
-      this.refresh.bind(this),
-    );
-
-    // signals for global.display
-    this._windowsRestackedSIGNAL = global.display.connect(
-      'restacked',
-      this.refresh.bind(this),
-    );
-    this._windowLeftMonitorSIGNAL = global.display.connect(
-      'window-left-monitor',
-      this.refresh.bind(this),
-    );
-    this._windowEnteredMonitorSIGNAL = global.display.connect(
-      'window-entered-monitor',
-      this.refresh.bind(this),
-    );
+    Signals.forEach((group) => {
+      group.listeners = group.map((signal) =>
+        group.namespace.connect(signal, this.refresh.bind()),
+      );
+    });
   }
 
   disconnectSignals() {
-    global.workspace_manager.disconnect(this._workspaceNumberChangedSIGNAL);
-    global.workspace_manager.disconnect(this._workspaceSwitchedSIGNAL);
-    global.workspace_manager.disconnect(this._workspaceReorderedSIGNAL);
-
-    Shell.WindowTracker.get_default().disconnect(this._windowsChangedSIGNAL);
-
-    global.display.disconnect(this._windowsRestackedSIGNAL);
-    global.display.disconnect(this._windowLeftMonitorSIGNAL);
-    global.display.disconnect(this._windowEnteredMonitorSIGNAL);
+    Signals.forEach((group) => {
+      group.listeners.forEach((listener) =>
+        group.namespace.disconnect(listener),
+      );
+      group.listeners = [];
+    });
   }
 
   refresh() {
@@ -131,29 +123,30 @@ class WorkspaceIndicator {
     const isActive =
       !isOtherMonitor &&
       global.workspace_manager.get_active_workspace_index() === index;
-    const showActiveWorkspaceIndicator = this._settings.get_boolean(
-      'show-active-workspace-indicator',
-    );
-    const roundIndicatorsBorder = this._settings.get_boolean(
-      'round-indicators-border',
-    );
+    // const showActiveWorkspaceIndicator = this._settings.get_boolean(
+    //   'show-active-workspace-indicator',
+    // );
+    // const roundIndicatorsBorder = this._settings.get_boolean(
+    //   'round-indicators-border',
+    // );
 
     let styles = 'workspace';
     if (isActive) {
       styles += ' active';
     }
-    if (!showActiveWorkspaceIndicator) {
-      styles += ' no-indicator';
-    }
-    if (!roundIndicatorsBorder) {
-      styles += ' no-rounded';
-    }
 
-    const indicatorsColor = this._settings.get_string('indicators-color');
+    // if (!showActiveWorkspaceIndicator) {
+    //   styles += ' no-indicator';
+    // }
+    // if (!roundIndicatorsBorder) {
+    //   styles += ' no-rounded';
+    // }
+
+    // const indicatorsColor = this._settings.get_string('indicators-color');
 
     const workspaceIndicator = new St.Bin({
       style_class: styles,
-      style: `border-color: ${indicatorsColor}`,
+      style: `border-color: red`,
       reactive: true,
       can_focus: true,
       track_hover: true,

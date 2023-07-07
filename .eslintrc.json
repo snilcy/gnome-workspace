@@ -8,8 +8,13 @@
     "ecmaVersion": "latest"
   },
   "env": {},
-  "plugins": ["prettier"],
-  "extends": ["eslint:recommended", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "prettier"],
+  "extends": [
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
   "rules": {
     "prettier/prettier": [
       "error",
@@ -18,17 +23,13 @@
       }
     ],
     "no-use-before-define": [
-      "error",
+      "warn",
       {
         "classes": false
       }
     ],
-    "camelcase": [
-      "error",
-      {
-        "properties": "never"
-      }
-    ],
-    "no-unused-vars": ["error", {}]
+    "camelcase": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/triple-slash-reference": "off"
   }
 }

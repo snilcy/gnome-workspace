@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "./build/",
+    "noEmit": false,
+    "declaration": false,
+    "target": "ES5",
+    "module": "commonjs",
+    "noEmitOnError": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "typeRoots": ["./src/types/"]
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["./src/types/_/*/**"]
+}
