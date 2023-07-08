@@ -6,23 +6,9 @@ function init() {
   return new WorkspaceIndicator();
 }
 
-type ITargetSignal = string;
-type ITargetListener = () => void;
-
-interface ITarget {
-  connect(signal: ITargetSignal, listener: ITargetListener): void;
-  disconnect(signal: ITargetSignal, listener: ITargetListener): void;
-}
-
-interface ITargetGroup {
-  target: ITarget;
-  signals: ITargetSignal[];
-  listener: ITargetListener[];
-}
-
 const Signals: ITargetGroup[] = [
   {
-    trarget: global.workspace_manager,
+    target: global.workspace_manager,
     signals: [
       'notify::n-workspaces', // add/remove workspace
       'workspace-switched', // change active workspace
@@ -31,16 +17,17 @@ const Signals: ITargetGroup[] = [
     listeners: [],
   },
   {
-    namespace: Shell.WindowTracker.get_default(),
+    target: Shell.WindowTracker.get_default(),
     signals: ['tracked-windows-changed'],
     listeners: [],
   },
   {
-    namespace: global.display,
+    target: global.display,
     signals: ['restacked', 'window-left-monitor', 'window-entered-monitor'],
     listeners: [],
   },
 ];
+
 // this.refresh.bind(this)
 
 // extension workspace indicator
@@ -74,16 +61,14 @@ class WorkspaceIndicator {
   connectSignals() {
     Signals.forEach((group) => {
       group.listeners = group.signals.map((signal) =>
-        group.namespace.connect(signal, this.refresh.bind(this)),
+        group.target.connect(signal, this.refresh.bind(this)),
       );
     });
   }
 
   disconnectSignals() {
     Signals.forEach((group) => {
-      group.listeners.forEach((listener) =>
-        group.namespace.disconnect(listener),
-      );
+      group.listeners.forEach((listener) => group.target.disconnect(listener));
       group.listeners = [];
     });
   }

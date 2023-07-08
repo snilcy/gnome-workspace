@@ -1,8 +1,9 @@
 /// <reference path="gi.d.ts" />
 /// <reference path="ui.d.ts" />
 /// <reference path="misc.d.ts" />
+
+/// <reference path="meta.d.ts" />
 /// <reference path="shell.d.ts" />
-/// <reference path="workspace-manager.d.ts" />
 
 declare namespace imports {
   export const gi: IGI;
@@ -14,12 +15,8 @@ declare namespace imports {
 
 declare namespace global {
   export function get_current_time(): void;
-  export const workspace_manager: IWorkspaceManager;
-  export const display: string;
-}
-
-declare namespace Shell {
-  export const WindowTracker: IShellWindowTracker;
+  export const workspace_manager: Meta.IWorkspaceManager;
+  export const display: Meta.IDisplay;
 }
 
 declare function log(...message: any[]): void;
