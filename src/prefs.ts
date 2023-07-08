@@ -1,22 +1,6 @@
 'use strict';
 
-const {
-  Clutter,
-  St,
-  Shell,
-  Gio,
-  GLib,
-  Gtk,
-  Main,
-  Dnd,
-  ModalDialog,
-  PanelMenu,
-  PopupMenu,
-  ExtensionUtils,
-  Gettext,
-  Cairo,
-  Me,
-} = imports.misc.extensionUtils.getCurrentExtension().imports.api;
+const {} = imports.misc.extensionUtils.getCurrentExtension().imports.api;
 
 function init() {
   Log('Prefs.init');

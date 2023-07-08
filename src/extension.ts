@@ -1,23 +1,4 @@
-const {
-  Clutter,
-  St,
-  Shell,
-  Gio,
-  GLib,
-  Gtk,
-  Main,
-  Dnd,
-  ModalDialog,
-  PanelMenu,
-  PopupMenu,
-  ExtensionUtils,
-  Gettext,
-  Cairo,
-  Me,
-  Log,
-  GObject,
-  Config,
-} = imports.misc.extensionUtils.getCurrentExtension().imports.api;
+const { Log } = imports.misc.extensionUtils.getCurrentExtension().imports.api;
 
 // initialize extension
 function init() {
@@ -25,9 +6,23 @@ function init() {
   return new WorkspaceIndicator();
 }
 
-const Signals = [
+type ITargetSignal = string;
+type ITargetListener = () => void;
+
+interface ITarget {
+  connect(signal: ITargetSignal, listener: ITargetListener): void;
+  disconnect(signal: ITargetSignal, listener: ITargetListener): void;
+}
+
+interface ITargetGroup {
+  target: ITarget;
+  signals: ITargetSignal[];
+  listener: ITargetListener[];
+}
+
+const Signals: ITargetGroup[] = [
   {
-    namespace: global.workspace_manager,
+    trarget: global.workspace_manager,
     signals: [
       'notify::n-workspaces', // add/remove workspace
       'workspace-switched', // change active workspace
@@ -78,8 +73,8 @@ class WorkspaceIndicator {
 
   connectSignals() {
     Signals.forEach((group) => {
-      group.listeners = group.map((signal) =>
-        group.namespace.connect(signal, this.refresh.bind()),
+      group.listeners = group.signals.map((signal) =>
+        group.namespace.connect(signal, this.refresh.bind(this)),
       );
     });
   }

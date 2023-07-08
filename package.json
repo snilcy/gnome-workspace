@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "./extension.js",
   "author": "Johnny Rocket <0.snilcy@gmail.com>",
+  "scripts": {
+    "build:extension": "tsc --project ./tsconfig.extension.json"
+  },
   "devDependencies": {},
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^5.61.0",

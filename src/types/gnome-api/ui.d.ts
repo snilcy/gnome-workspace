@@ -1,4 +1,4 @@
-interface Iui {
+interface IUI {
   main: string;
   dnd: string;
   modalDialog: string;

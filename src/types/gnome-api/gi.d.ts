@@ -1,4 +1,4 @@
-interface Igi {
+interface IGI {
   Clutter: string;
   St: string;
   Shell: string;

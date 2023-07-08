@@ -1,13 +1,12 @@
-const { gi, ui, misc, gettext, cairo } = imports;
-
-// GJS's Built-in Modules are in the top-level
-// See: https://gitlab.gnome.org/GNOME/gjs/wikis/Modules
+const { gi: GI, ui: UI, misc: Misc, gettext: Gettext, cairo: Cairo } = imports;
 
 const Me = ExtensionUtils.getCurrentExtension();
 
 function Log(...items: any[]) {
   log(`SNILCY ==> ${items.join(' ')} <==`);
 }
+
+export { GI, UI, Misc, Gettext, Cairo, Log, Me };
 
 // export function newClutterActor(): Actor {
 //   return new Clutter.Actor();

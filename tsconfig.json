@@ -13,6 +13,5 @@
     "skipLibCheck": true,
     "typeRoots": ["./src/types/"]
   },
-  "include": ["./src/**/*.ts"],
-  "exclude": ["./src/types/_/*/**"]
+  "include": ["./src/**/*.ts"]
 }
