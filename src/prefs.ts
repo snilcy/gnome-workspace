@@ -1,6 +1,4 @@
-'use strict';
-
-const {} = imports.misc.extensionUtils.getCurrentExtension().imports.api;
+/// <reference path="./types/gnome-api/global.d.ts" />
 
 function init() {
   Log('Prefs.init');

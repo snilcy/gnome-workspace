@@ -1,6 +1,7 @@
 /// <reference path="gi.d.ts" />
 /// <reference path="ui.d.ts" />
 /// <reference path="misc.d.ts" />
+/// <reference path="extension.d.ts" />
 
 /// <reference path="meta.d.ts" />
 /// <reference path="shell.d.ts" />

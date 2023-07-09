@@ -4,12 +4,17 @@
   "main": "./extension.js",
   "author": "Johnny Rocket <0.snilcy@gmail.com>",
   "scripts": {
-    "build:extension": "tsc --project ./tsconfig.extension.json"
+    "build:extension": "tsc --project ./tsconfig.extension.json",
+    "build:prefs": "tsc --project ./tsconfig.prefs.json",
+    "build:clear": "rm -rf ./build/",
+    "build:copy": "cp -r ./src/{schemas,metadata.json} ./build/",
+    "build": "concurrently 'yarn:build:*(!clear)'"
   },
   "devDependencies": {},
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
+    "concurrently": "^8.2.0",
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^5.0.0-alpha.2",

@@ -1,6 +1,6 @@
 /// <reference path="global.d.ts" />
 
-interface IExtensionApi {
+interface IApi {
   GI: IGI;
   UI: IUI;
   Misc: IMisc;
@@ -8,18 +8,20 @@ interface IExtensionApi {
   Cairo: string;
   Log: typeof log;
   Me: object;
+  Gtk: IGtk;
+  Shell: Shell;
 }
 
-interface IExtensionImports {
-  api: IExtensionApi;
+interface IImports {
+  api: IApi;
 }
 
-interface IExtension {
-  imports: IExtensionImports;
+interface IModule {
+  imports: IImports;
 }
 
 interface IExtensionUtils {
-  getCurrentExtension: () => IExtension;
+  getCurrentExtension: () => IModule;
 }
 
 interface IMisc {

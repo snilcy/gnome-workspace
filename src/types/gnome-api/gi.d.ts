@@ -1,10 +1,10 @@
 interface IGI {
   Clutter: string;
   St: string;
-  Shell: string;
+  Shell: Shell;
   Gio: string;
   GLib: string;
-  Gtk: string;
+  Gtk: IGtk;
   GObject: string;
   Meta: string;
 }

@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
-    "outDir": "./build/",
     "noEmit": false,
     "declaration": false,
-    "target": "ES5",
-    "module": "commonjs",
+    "target": "ES2020",
+    "module": "None",
     "noEmitOnError": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": false,
+    "forceConsistentCasingInFileNames": false,
     "skipLibCheck": true,
-    "typeRoots": ["./src/types/"]
+    "removeComments": true,
+    "incremental": true
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/api.ts", "./src/extension.ts"],
+  "exclude": []
 }

@@ -30,6 +30,13 @@
     ],
     "camelcase": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/triple-slash-reference": "off"
+    "@typescript-eslint/triple-slash-reference": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "varsIgnorePattern": "init|buildPrefsWidget"
+      }
+    ],
+    "@typescript-eslint/no-empty-function": "off"
   }
 }

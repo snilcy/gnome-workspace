@@ -1,8 +1,8 @@
 type ITargetSignal = string;
-type ITargetListener = () => void;
+type ISignalCallbackParams<T> = (...args: Parameters<T[keyof T]>) => void;
 
-interface ITarget {
-  connect(signal: ITargetSignal, listener: ITargetListener): ITargetListener;
+interface ITarget<S> {
+  connect(signal: keyof S, listener: ISignalCallbackParams<S>): ITargetListener;
   disconnect(listener: ITargetListener): ITargetListener;
 }
 

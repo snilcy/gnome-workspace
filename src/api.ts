@@ -1,12 +1,15 @@
 const { gi: GI, ui: UI, misc: Misc, gettext: Gettext, cairo: Cairo } = imports;
 
+const { Gtk } = GI;
+
+const ExtensionUtils = Misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
 function Log(...items: any[]) {
   log(`SNILCY ==> ${items.join(' ')} <==`);
 }
 
-export { GI, UI, Misc, Gettext, Cairo, Log, Me };
+// export { GI, UI, Misc, Gettext, Cairo, Log, Me, ExtensionUtils, Gtk };
 
 // export function newClutterActor(): Actor {
 //   return new Clutter.Actor();
