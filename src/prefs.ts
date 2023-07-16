@@ -1,4 +1,5 @@
-/// <reference path="./types/gnome-api/global.d.ts" />
+import { Gtk } from './api';
+import { Log } from './utils';
 
 function init() {
   Log('Prefs.init');
@@ -12,6 +13,7 @@ function buildPrefsWidget() {
   // const settings = imports.misc.extensionUtils.getSettings(
   //   'org.gnome.shell.extensions.workspaces-indicator-by-open-apps',
   // );
+
 
   // Create a parent container widget that is auto-centered
   const prefsWidget = new Gtk.CenterBox({

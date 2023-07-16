@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "outFile": "./build/prefs.js"
-  },
-  "files": ["./src/api.ts", "./src/prefs.ts"],
-  "include": [],
-  "extends": "./tsconfig.json"
-}

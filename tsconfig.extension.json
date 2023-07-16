@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "outFile": "./build/extension.js"
-  },
-  "files": ["./src/api.ts", "./src/extension.ts"],
-  "include": [],
-  "extends": "./tsconfig.json"
-}

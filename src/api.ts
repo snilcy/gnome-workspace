@@ -1,15 +1,33 @@
-const { gi: GI, ui: UI, misc: Misc, gettext: Gettext, cairo: Cairo } = imports;
 
-const { Gtk } = GI;
+export const WorkspaceManager = global.workspace_manager;
+export const Display = global.display;
 
-const ExtensionUtils = Misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+export const GLib = imports.gi.GLib;
+export const Gtk = imports.gi.Gtk;
 
-function Log(...items: any[]) {
-  log(`SNILCY ==> ${items.join(' ')} <==`);
-}
+// const { gi: GI, ui: UI, misc: Misc, gettext: Gettext, cairo: Cairo } = imports;
+// const { workspace_manager: WorkspaceManager, display: Display } = global;
 
-// export { GI, UI, Misc, Gettext, Cairo, Log, Me, ExtensionUtils, Gtk };
+// WorkspaceManager
+
+// const ExtensionUtils = Misc.extensionUtils;
+// const Me = ExtensionUtils.getCurrentExtension();
+
+// export {
+//   Log,
+//   Misc,
+//   Gettext,
+//   Cairo,
+//   Me,
+//   ExtensionUtils,
+//   Gtk,
+//   // St,
+//   WorkspaceManager,
+//   Display,
+//   // Meta,
+//   // Shell,
+//   // St,
+// };
 
 // export function newClutterActor(): Actor {
 //   return new Clutter.Actor();

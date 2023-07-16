@@ -4,21 +4,29 @@
   "main": "./extension.js",
   "author": "Johnny Rocket <0.snilcy@gmail.com>",
   "scripts": {
-    "build:extension": "tsc --project ./tsconfig.extension.json",
-    "build:prefs": "tsc --project ./tsconfig.prefs.json",
-    "build:clear": "rm -rf ./build/",
-    "build:copy": "cp -r ./src/{schemas,metadata.json} ./build/",
-    "build": "concurrently 'yarn:build:*(!clear)'"
+    "esbuild": "node ./esbuild.js",
+    "esbuild:watch": "node ./esbuild.js --watch",
+    "copy": "cp -r ./src/{schemas,metadata.json} ./build/",
+    "scss": "node ./scss.js",
+    "build": "rm -rf build && yarn esbuild && yarn scss && yarn copy"
   },
-  "devDependencies": {},
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.61.0",
-    "@typescript-eslint/parser": "^5.61.0",
-    "concurrently": "^8.2.0",
-    "eslint": "^8.44.0",
+    "@girs/gjs": "^3.2.0",
+    "@girs/glib-2.0": "^2.76.1-3.2.0",
+    "@girs/gtk-4.0": "^4.10.4-3.2.0",
+    "@girs/meta-12": "^12.0.0-3.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "esbuild": "^0.18.11",
+    "esbuild-plugin-clean": "^1.0.1",
+    "esbuild-plugin-copy": "^2.1.1",
+    "eslint": "^8.45.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^5.0.0-alpha.2",
+    "minimist": "^1.2.8",
     "prettier": "^3.0.0",
+    "sass": "^1.63.6",
     "typescript": "^5.1.6"
-  }
+  },
+  "packageManager": "yarn@3.6.1"
 }
