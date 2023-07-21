@@ -19,7 +19,8 @@
     "prettier/prettier": [
       "error",
       {
-        "singleQuote": true
+        "singleQuote": true,
+        "semi": false
       }
     ],
     "no-use-before-define": [

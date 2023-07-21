@@ -1,8 +1,7 @@
-// src/api.ts
-var WorkspaceManager = global.workspace_manager;
-var Display = global.display;
+// src/api/index.ts
 var GLib = imports.gi.GLib;
 var Gtk = imports.gi.Gtk;
+var St = imports.gi.St;
 
 // src/utils.ts
 var Log = (...items) => {

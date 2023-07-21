@@ -1,57 +1,40 @@
-import { WorkspaceManager } from './api';
-import { Log } from './utils';
+import { Display } from './api/display'
+import { WorkspaceManager } from './api/workspace-manager'
+import { WindowTracker } from './api/window-tracker'
+import { Log } from './utils'
+import { St } from './api'
+import type ISt from 'st-12'
+import { Workspace } from './api/workspace'
 
 // import { Display, Log, St, WorkspaceManager } from './api';
 // // import type { IStWidget } from './types/gnome-api/st';
 
 // initialize extension
 function init() {
-  Log('WorkspaceIndicator.init');
-  return new WorkspaceIndicator();
+  Log('WorkspaceIndicator.init')
+  return new WorkspaceIndicator()
 }
 
-// const Signals: ITargetGroup[] = [
-//   {
-//     target: WorkspaceManager,
-//     signals: [
-//       'notify::n-workspaces', // add/remove workspace
-//       'workspace-switched', // change active workspace
-//       'workspaces-reordered', // reorder workspaces
-//     ],
-//     listeners: [],
-//   },
-//   // {
-//   //   target: Shell.WindowTracker.get_default(),
-//   //   signals: ['tracked-windows-changed'],
-//   //   listeners: [],
-//   // },
-//   {
-//     target: Display,
-//     signals: ['restacked', 'window-left-monitor', 'window-entered-monitor'],
-//     listeners: [],
-//   },
-// ];
-
-// // this.refresh.bind(this)
-
-// extension workspace indicator
 class WorkspaceIndicator {
-  // constructor() {}
-  // workspacesIndicators: IStWidget[] = [];
+  workspacesIndicators: ISt.Bin[] = []
+  listeners: {
+    target: { disconnect(handlerID: number): void }
+    handlerIDs: number[]
+  }[] = []
 
   enable() {
-    Log('WorkspaceIndicator.enable');
+    Log('WorkspaceIndicator.enable')
     // this._settings = imports.misc.extensionUtils.getSettings(
     //   'org.gnome.shell.extensions.workspace-gnome',
     // );
     // this._workspacesIndicators = [];
     // this._hasOtherMonitor = false;
-    // this.connectSignals();
-    // this.refresh();
+    this.connectSignals()
+    this.refresh()
   }
 
   disable() {
-    Log('WorkspaceIndicator.disable');
+    Log('WorkspaceIndicator.disable')
 
     // this._settings = {};
 
@@ -59,161 +42,189 @@ class WorkspaceIndicator {
     // this._workspacesIndicators = [];
     // this._hasOtherMonitor = null;
 
-    // this.disconnectSignals();
-    // this.refresh();
+    this.disconnectSignals()
+    this.refresh()
   }
 
-  // connectSignals() {
-  //   Signals.forEach((group) => {
-  //     group.listeners = group.signals.map((signal) =>
-  //       group.target.connect(signal, this.refresh.bind(this, signal)),
-  //     );
-  //   });
-  // }
+  addHandler = (signal: string) => () => this.refresh(signal)
 
-  // disconnectSignals() {
-  //   Signals.forEach((group) => {
-  //     group.listeners.forEach((listener) => group.target.disconnect(listener));
-  //     group.listeners = [];
-  //   });
-  // }
+  connectSignals() {
+    this.listeners = [
+      {
+        target: WorkspaceManager,
+        handlerIDs: [
+          WorkspaceManager.connect('notify::n-workspaces', () =>
+            this.refresh('WorkspaceManager.notify::n-workspaces'),
+          ),
+          WorkspaceManager.connect('workspace-switched', () =>
+            this.refresh('WorkspaceManager.workspace-switched'),
+          ),
+          WorkspaceManager.connect('workspaces-reordered', () =>
+            this.refresh('WorkspaceManager.workspaces-reordered'),
+          ),
+        ],
+      },
+      {
+        target: Display,
+        handlerIDs: [
+          Display.connect('restacked', () => this.refresh('Display.restacked')),
+          Display.connect('window-left-monitor', () =>
+            this.refresh('Display.window-left-monitor'),
+          ),
+          Display.connect('window-entered-monitor', () =>
+            this.refresh('Display.window-entered-monitor'),
+          ),
+        ],
+      },
+      {
+        target: WindowTracker,
+        handlerIDs: [
+          WindowTracker.connect('tracked-windows-changed', () =>
+            this.refresh('WindowTracker.tracked-windows-changed'),
+          ),
+        ],
+      },
+    ]
+  }
 
-  // refresh(data?: string) {
-  //   Log('refresh', data);
-  //   // this._workspacesIndicators.splice(0).forEach((i) => i.destroy());
+  disconnectSignals() {
+    this.listeners.forEach(({ target, handlerIDs }) => {
+      handlerIDs.forEach((id) => target.disconnect(id))
+    })
+  }
 
-  //   // check if apps on all workspaces (other monitor)
-  //   // const windows = global.workspace_manager
-  //   //   .get_workspace_by_index(0)
-  //   //   .list_windows()
-  //   //   .filter((w) => w.is_on_all_workspaces());
+  destroy() {
+    this.workspacesIndicators.forEach((bin) => bin.destroy())
+  }
 
-  //   // if (windows && windows.length > 0) {
-  //   //   this._hasOtherMonitor = true;
-  //   //   this.createIndicatorButton(0, true);
-  //   // }
+  refresh(data?: string) {
+    Log('SIGNAL', data, WorkspaceManager.length)
+    this.destroy()
 
-  //   for (let i = 0; i < WorkspaceManager.get_n_workspaces(); i++) {
-  //     this.createIndicatorButton(i, false);
-  //   }
-  // }
+    // check if apps on all workspaces (other monitor)
+    // const windows = global.workspace_manager
+    //   .get_workspace_by_index(0)
+    //   .list_windows()
+    //   .filter((w) => w.is_on_all_workspaces());
 
-  // createIndicatorButton(index: number, isOtherMonitor: boolean) {
-  //   const workspace = WorkspaceManager.get_workspace_by_index(index);
+    // if (windows && windows.length > 0) {
+    //   this._hasOtherMonitor = true;
+    //   this.createIndicatorButton(0, true);
+    // }
 
-  //   if (!workspace) return;
+    this.workspacesIndicators = WorkspaceManager.workspaces.map(
+      this.getIndicatorButton,
+    )
+  }
 
-  //   const windows = workspace
-  //     .list_windows()
-  //     .filter((w) =>
-  //       isOtherMonitor ? w.is_on_all_workspaces() : !w.is_on_all_workspaces(),
-  //     );
+  getIndicatorButton(workspace: Workspace) {
+    const windows = workspace.windows.filter(
+      (w) =>
+        // isOtherMonitor ? w.isOnSecondMonitor : !w.isOnSecondMonitor,
+        w,
+    )
 
-  //   const isActive =
-  //     !isOtherMonitor &&
-  //     WorkspaceManager.get_active_workspace_index() === index;
+    const isActive = workspace.active
 
-  //   // const showActiveWorkspaceIndicator = this._settings.get_boolean(
-  //   //   'show-active-workspace-indicator',
-  //   // );
-  //   // const roundIndicatorsBorder = this._settings.get_boolean(
-  //   //   'round-indicators-border',
-  //   // );
+    // const showActiveWorkspaceIndicator = this._settings.get_boolean(
+    //   'show-active-workspace-indicator',
+    // );
+    // const roundIndicatorsBorder = this._settings.get_boolean(
+    //   'round-indicators-border',
+    // );
 
-  //   const styles = ['workspace'];
+    const styles = ['workspace']
 
-  //   if (isActive) {
-  //     styles.push('active');
-  //   }
+    if (isActive) {
+      styles.push('active')
+    }
 
-  //   // if (!showActiveWorkspaceIndicator) {
-  //   //   styles += ' no-indicator';
-  //   // }
-  //   // if (!roundIndicatorsBorder) {
-  //   //   styles += ' no-rounded';
-  //   // }
+    // if (!showActiveWorkspaceIndicator) {
+    //   styles += ' no-indicator';
+    // }
+    // if (!roundIndicatorsBorder) {
+    //   styles += ' no-rounded';
+    // }
 
-  //   // const indicatorsColor = this._settings.get_string('indicators-color');
+    // const indicatorsColor = this._settings.get_string('indicators-color');
 
-  //   const workspaceIndicator = new St.Bin({
-  //     style_class: styles.join(' '),
-  //     style: `border-color: red`,
-  //     reactive: true,
-  //     can_focus: true,
-  //     track_hover: true,
-  //     child: new St.BoxLayout(),
-  //   });
+    return new St.Bin({
+      style_class: styles.join(' '),
+      style: `border-color: red`,
+      reactive: true,
+      can_focus: true,
+      track_hover: true,
+      child: new St.BoxLayout(),
+    })
 
-  //   this.workspacesIndicators.push(workspaceIndicator);
+    // // drag and drop
+    // workspaceIndicator._delegate = workspaceIndicator;
 
-  //   // // drag and drop
-  //   // workspaceIndicator._delegate = workspaceIndicator;
+    // workspaceIndicator._workspaceIndex = index;
 
-  //   // workspaceIndicator._workspaceIndex = index;
+    // workspaceIndicator.acceptDrop = function (source) {
+    //   if (source._workspaceIndex !== this._workspaceIndex) {
+    //     source._window.change_workspace_by_index(this._workspaceIndex, false);
+    //     source._window.activate(global.get_current_time());
+    //     return true;
+    //   }
+    //   return false;
+    // };
 
-  //   // workspaceIndicator.acceptDrop = function (source) {
-  //   //   if (source._workspaceIndex !== this._workspaceIndex) {
-  //   //     source._window.change_workspace_by_index(this._workspaceIndex, false);
-  //   //     source._window.activate(global.get_current_time());
-  //   //     return true;
-  //   //   }
-  //   //   return false;
-  //   // };
+    // // switch to workspace on click
+    // workspaceIndicator.connect('button-release-event', () =>
+    //   workspace.activate(global.get_current_time()),
+    // );
 
-  //   // // switch to workspace on click
-  //   // workspaceIndicator.connect('button-release-event', () =>
-  //   //   workspace.activate(global.get_current_time()),
-  //   // );
+    // // assign to "this" settings otherwise function triggered on connect can't access them
+    // workspaceIndicator.scrollWrap =
+    //   this._settings.get_boolean('scroll-wraparound');
+    // workspaceIndicator.inverseScroll =
+    //   this._settings.get_boolean('inverse-scroll');
+    // // scroll workspaces on mousewhell scroll
+    // workspaceIndicator.connect(
+    //   'scroll-event',
+    //   this.scrollWorkspace.bind(workspaceIndicator),
+    // );
 
-  //   // // assign to "this" settings otherwise function triggered on connect can't access them
-  //   // workspaceIndicator.scrollWrap =
-  //   //   this._settings.get_boolean('scroll-wraparound');
-  //   // workspaceIndicator.inverseScroll =
-  //   //   this._settings.get_boolean('inverse-scroll');
-  //   // // scroll workspaces on mousewhell scroll
-  //   // workspaceIndicator.connect(
-  //   //   'scroll-event',
-  //   //   this.scrollWorkspace.bind(workspaceIndicator),
-  //   // );
+    // // create apps icons
+    // this.createIndicatorIcons(workspaceIndicator, windows, index);
 
-  //   // // create apps icons
-  //   // this.createIndicatorIcons(workspaceIndicator, windows, index);
+    // const showWorkspaceIndex = this._settings.get_boolean(
+    //   'show-workspace-index',
+    // );
+    // if (showWorkspaceIndex || isOtherMonitor) {
+    //   this.createIndicatorLabel(
+    //     workspaceIndicator,
+    //     index,
+    //     isOtherMonitor
+    //       ? this._settings.get_string('apps-on-all-workspaces-indicator')
+    //       : null,
+    //   );
+    // }
 
-  //   // const showWorkspaceIndex = this._settings.get_boolean(
-  //   //   'show-workspace-index',
-  //   // );
-  //   // if (showWorkspaceIndex || isOtherMonitor) {
-  //   //   this.createIndicatorLabel(
-  //   //     workspaceIndicator,
-  //   //     index,
-  //   //     isOtherMonitor
-  //   //       ? this._settings.get_string('apps-on-all-workspaces-indicator')
-  //   //       : null,
-  //   //   );
-  //   // }
+    // // add to panel
+    // let box;
+    // switch (this._settings.get_enum('panel-position')) {
+    //   case 0:
+    //     box = '_leftBox';
+    //     break;
+    //   case 1:
+    //     box = '_centerBox';
+    //     break;
+    //   case 2:
+    //     box = '_rightBox';
+    //     break;
+    // }
 
-  //   // // add to panel
-  //   // let box;
-  //   // switch (this._settings.get_enum('panel-position')) {
-  //   //   case 0:
-  //   //     box = '_leftBox';
-  //   //     break;
-  //   //   case 1:
-  //   //     box = '_centerBox';
-  //   //     break;
-  //   //   case 2:
-  //   //     box = '_rightBox';
-  //   //     break;
-  //   // }
+    // const position = this._settings.get_int('position');
 
-  //   // const position = this._settings.get_int('position');
-
-  //   // // index to insert indicator in panel
-  //   // const insertIndex = isOtherMonitor
-  //   //   ? 0
-  //   //   : position + index + (this._hasOtherMonitor ? 1 : 0);
-  //   // Main.panel[box].insert_child_at_index(workspaceIndicator, insertIndex);
-  // }
+    // // index to insert indicator in panel
+    // const insertIndex = isOtherMonitor
+    //   ? 0
+    //   : position + index + (this._hasOtherMonitor ? 1 : 0);
+    // Main.panel[box].insert_child_at_index(workspaceIndicator, insertIndex);
+  }
 
   // createIndicatorIcons(button, windows, index) {
   //   // windows

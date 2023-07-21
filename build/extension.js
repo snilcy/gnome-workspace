@@ -1,7 +1,98 @@
+// src/api/display.ts
+var { display: gDisplay } = global;
+var connect = (...args) => {
+  return gDisplay.connect(...args);
+};
+var Display = {
+  connect,
+  disconnect(id) {
+    gDisplay.disconnect(id);
+  }
+};
+
+// src/api/window.ts
+var Window = class {
+  constructor(gWindow) {
+    this.gWindow = gWindow;
+  }
+  get isOnSecondMonitor() {
+    return this.gWindow.is_on_all_workspaces();
+  }
+};
+
+// src/api/workspace.ts
+var Workspace = class {
+  constructor(gWorkspace) {
+    this.gWorkspace = gWorkspace;
+  }
+  get windows() {
+    return this.gWorkspace.list_windows().map((gWindow) => new Window(gWindow));
+  }
+  get active() {
+    return this.gWorkspace.active;
+  }
+};
+
+// src/api/workspace-manager.ts
+var { workspace_manager: gWrokspaceManager } = global;
+var connect2 = (...args) => {
+  return gWrokspaceManager.connect(...args);
+};
+var WorkspaceManager = {
+  connect: connect2,
+  disconnect(id) {
+    gWrokspaceManager.disconnect(id);
+  },
+  get workspaces() {
+    const workspaces = [];
+    const length = this.length;
+    for (let id = 0; id < length; id++) {
+      const workspace = this.getWorkspaceById(id);
+      if (workspace) {
+        workspaces.push(workspace);
+      }
+    }
+    return workspaces;
+  },
+  getWorkspaceById(id) {
+    const gWorkspace = gWrokspaceManager.get_workspace_by_index(id);
+    if (gWorkspace) {
+      return new Workspace(gWorkspace);
+    }
+    return null;
+  },
+  get activeWorkspaceId() {
+    return gWrokspaceManager.get_active_workspace_index();
+  },
+  isActiveWorkspaceId(id) {
+    return gWrokspaceManager.get_active_workspace_index() === id;
+  },
+  get length() {
+    return gWrokspaceManager.get_n_workspaces();
+  }
+};
+
+// src/api/window-tracker.ts
+var gWindowTracker = imports.gi.Shell.WindowTracker.get_default();
+var connect3 = (...args) => {
+  return gWindowTracker.connect(...args);
+};
+var WindowTracker = {
+  connect: connect3,
+  disconnect(id) {
+    gWindowTracker.disconnect(id);
+  }
+};
+
 // src/utils.ts
 var Log = (...items) => {
   log(`SNILCY.N ==> ${items.join(" ")} <==`);
 };
+
+// src/api/index.ts
+var GLib = imports.gi.GLib;
+var Gtk = imports.gi.Gtk;
+var St = imports.gi.St;
 
 // src/extension.ts
 function init() {
@@ -9,139 +100,99 @@ function init() {
   return new WorkspaceIndicator();
 }
 var WorkspaceIndicator = class {
-  // constructor() {}
-  // workspacesIndicators: IStWidget[] = [];
+  constructor() {
+    this.workspacesIndicators = [];
+    this.listeners = [];
+    this.addHandler = (signal) => () => this.refresh(signal);
+  }
   enable() {
     Log("WorkspaceIndicator.enable");
+    this.connectSignals();
   }
   disable() {
     Log("WorkspaceIndicator.disable");
+    this.disconnectSignals();
   }
-  // connectSignals() {
-  //   Signals.forEach((group) => {
-  //     group.listeners = group.signals.map((signal) =>
-  //       group.target.connect(signal, this.refresh.bind(this, signal)),
-  //     );
-  //   });
-  // }
-  // disconnectSignals() {
-  //   Signals.forEach((group) => {
-  //     group.listeners.forEach((listener) => group.target.disconnect(listener));
-  //     group.listeners = [];
-  //   });
-  // }
-  // refresh(data?: string) {
-  //   Log('refresh', data);
-  //   // this._workspacesIndicators.splice(0).forEach((i) => i.destroy());
-  //   // check if apps on all workspaces (other monitor)
-  //   // const windows = global.workspace_manager
-  //   //   .get_workspace_by_index(0)
-  //   //   .list_windows()
-  //   //   .filter((w) => w.is_on_all_workspaces());
-  //   // if (windows && windows.length > 0) {
-  //   //   this._hasOtherMonitor = true;
-  //   //   this.createIndicatorButton(0, true);
-  //   // }
-  //   for (let i = 0; i < WorkspaceManager.get_n_workspaces(); i++) {
-  //     this.createIndicatorButton(i, false);
-  //   }
-  // }
-  // createIndicatorButton(index: number, isOtherMonitor: boolean) {
-  //   const workspace = WorkspaceManager.get_workspace_by_index(index);
-  //   if (!workspace) return;
-  //   const windows = workspace
-  //     .list_windows()
-  //     .filter((w) =>
-  //       isOtherMonitor ? w.is_on_all_workspaces() : !w.is_on_all_workspaces(),
-  //     );
-  //   const isActive =
-  //     !isOtherMonitor &&
-  //     WorkspaceManager.get_active_workspace_index() === index;
-  //   // const showActiveWorkspaceIndicator = this._settings.get_boolean(
-  //   //   'show-active-workspace-indicator',
-  //   // );
-  //   // const roundIndicatorsBorder = this._settings.get_boolean(
-  //   //   'round-indicators-border',
-  //   // );
-  //   const styles = ['workspace'];
-  //   if (isActive) {
-  //     styles.push('active');
-  //   }
-  //   // if (!showActiveWorkspaceIndicator) {
-  //   //   styles += ' no-indicator';
-  //   // }
-  //   // if (!roundIndicatorsBorder) {
-  //   //   styles += ' no-rounded';
-  //   // }
-  //   // const indicatorsColor = this._settings.get_string('indicators-color');
-  //   const workspaceIndicator = new St.Bin({
-  //     style_class: styles.join(' '),
-  //     style: `border-color: red`,
-  //     reactive: true,
-  //     can_focus: true,
-  //     track_hover: true,
-  //     child: new St.BoxLayout(),
-  //   });
-  //   this.workspacesIndicators.push(workspaceIndicator);
-  //   // // drag and drop
-  //   // workspaceIndicator._delegate = workspaceIndicator;
-  //   // workspaceIndicator._workspaceIndex = index;
-  //   // workspaceIndicator.acceptDrop = function (source) {
-  //   //   if (source._workspaceIndex !== this._workspaceIndex) {
-  //   //     source._window.change_workspace_by_index(this._workspaceIndex, false);
-  //   //     source._window.activate(global.get_current_time());
-  //   //     return true;
-  //   //   }
-  //   //   return false;
-  //   // };
-  //   // // switch to workspace on click
-  //   // workspaceIndicator.connect('button-release-event', () =>
-  //   //   workspace.activate(global.get_current_time()),
-  //   // );
-  //   // // assign to "this" settings otherwise function triggered on connect can't access them
-  //   // workspaceIndicator.scrollWrap =
-  //   //   this._settings.get_boolean('scroll-wraparound');
-  //   // workspaceIndicator.inverseScroll =
-  //   //   this._settings.get_boolean('inverse-scroll');
-  //   // // scroll workspaces on mousewhell scroll
-  //   // workspaceIndicator.connect(
-  //   //   'scroll-event',
-  //   //   this.scrollWorkspace.bind(workspaceIndicator),
-  //   // );
-  //   // // create apps icons
-  //   // this.createIndicatorIcons(workspaceIndicator, windows, index);
-  //   // const showWorkspaceIndex = this._settings.get_boolean(
-  //   //   'show-workspace-index',
-  //   // );
-  //   // if (showWorkspaceIndex || isOtherMonitor) {
-  //   //   this.createIndicatorLabel(
-  //   //     workspaceIndicator,
-  //   //     index,
-  //   //     isOtherMonitor
-  //   //       ? this._settings.get_string('apps-on-all-workspaces-indicator')
-  //   //       : null,
-  //   //   );
-  //   // }
-  //   // // add to panel
-  //   // let box;
-  //   // switch (this._settings.get_enum('panel-position')) {
-  //   //   case 0:
-  //   //     box = '_leftBox';
-  //   //     break;
-  //   //   case 1:
-  //   //     box = '_centerBox';
-  //   //     break;
-  //   //   case 2:
-  //   //     box = '_rightBox';
-  //   //     break;
-  //   // }
-  //   // const position = this._settings.get_int('position');
-  //   // // index to insert indicator in panel
-  //   // const insertIndex = isOtherMonitor
-  //   //   ? 0
-  //   //   : position + index + (this._hasOtherMonitor ? 1 : 0);
-  //   // Main.panel[box].insert_child_at_index(workspaceIndicator, insertIndex);
-  // }
+  connectSignals() {
+    this.listeners = [
+      {
+        target: WorkspaceManager,
+        handlerIDs: [
+          WorkspaceManager.connect(
+            "notify::n-workspaces",
+            () => this.refresh("WorkspaceManager.notify::n-workspaces")
+          ),
+          WorkspaceManager.connect(
+            "workspace-switched",
+            () => this.refresh("WorkspaceManager.workspace-switched")
+          ),
+          WorkspaceManager.connect(
+            "workspaces-reordered",
+            () => this.refresh("WorkspaceManager.workspaces-reordered")
+          )
+        ]
+      },
+      {
+        target: Display,
+        handlerIDs: [
+          Display.connect("restacked", () => this.refresh("Display.restacked")),
+          Display.connect(
+            "window-left-monitor",
+            () => this.refresh("Display.window-left-monitor")
+          ),
+          Display.connect(
+            "window-entered-monitor",
+            () => this.refresh("Display.window-entered-monitor")
+          )
+        ]
+      },
+      {
+        target: WindowTracker,
+        handlerIDs: [
+          WindowTracker.connect(
+            "tracked-windows-changed",
+            () => this.refresh("WindowTracker.tracked-windows-changed")
+          )
+        ]
+      }
+    ];
+  }
+  disconnectSignals() {
+    this.listeners.forEach(({ target, handlerIDs }) => {
+      handlerIDs.forEach((id) => target.disconnect(id));
+    });
+  }
+  destroy() {
+    this.workspacesIndicators.forEach((bin) => bin.destroy());
+  }
+  refresh(data) {
+    Log("SIGNAL", data, WorkspaceManager.length);
+    this.destroy();
+    this.workspacesIndicators = WorkspaceManager.workspaces.map(
+      this.getIndicatorButton
+    );
+  }
+  getIndicatorButton(workspace) {
+    const windows = workspace.windows.filter(
+      (w) => (
+        // isOtherMonitor ? w.isOnSecondMonitor : !w.isOnSecondMonitor,
+        w
+      )
+    );
+    const isActive = workspace.active;
+    const styles = ["workspace"];
+    if (isActive) {
+      styles.push("active");
+    }
+    return new St.Bin({
+      style_class: styles.join(" "),
+      style: `border-color: red`,
+      reactive: true,
+      can_focus: true,
+      track_hover: true,
+      child: new St.BoxLayout()
+    });
+  }
   // createIndicatorIcons(button, windows, index) {
   //   // windows
   //   //   .sort((w1, w2) => w1.get_id() - w2.get_id()) // sort by ids

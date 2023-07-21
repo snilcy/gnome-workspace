@@ -14,7 +14,6 @@ function buildPrefsWidget() {
   //   'org.gnome.shell.extensions.workspaces-indicator-by-open-apps',
   // );
 
-
   // Create a parent container widget that is auto-centered
   const prefsWidget = new Gtk.CenterBox({
     visible: true,

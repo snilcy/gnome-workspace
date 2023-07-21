@@ -17,10 +17,7 @@
     "pretty": true,
     "downlevelIteration": true,
     "outDir": "./build/",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@girs/",
-    ],
+    "typeRoots": ["./node_modules/@types", "./node_modules/@girs/"],
     "rootDir": ".",
     "baseUrl": ".",
     "moduleResolution": "Node",
@@ -32,5 +29,6 @@
     "allowJs": true,
     "importHelpers": true
   },
-  "include": ["./src/types/extension.d.ts", "./src/*"]
+  "include": ["@types/Gjs/*.d.ts", "./src/api/types.d.ts", "./src/**/*.ts"],
+  "exclude": ["node_modules"]
 }

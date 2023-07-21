@@ -1,9 +1,6 @@
-
-export const WorkspaceManager = global.workspace_manager;
-export const Display = global.display;
-
-export const GLib = imports.gi.GLib;
-export const Gtk = imports.gi.Gtk;
+export const GLib = imports.gi.GLib
+export const Gtk = imports.gi.Gtk
+export const St = imports.gi.St
 
 // const { gi: GI, ui: UI, misc: Misc, gettext: Gettext, cairo: Cairo } = imports;
 // const { workspace_manager: WorkspaceManager, display: Display } = global;

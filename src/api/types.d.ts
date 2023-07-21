@@ -1,5 +1,5 @@
-import { Meta } from '@girs/meta-12';
-// import type GLib from '@girs/glib-2.0';
+import type { Meta } from '@girs/meta-12';
+import type { Shell } from '@girs/shell-12';
 
 interface Global {
   workspace_manager: Meta.WorkspaceManager;
@@ -7,5 +7,5 @@ interface Global {
 }
 
 export declare global {
-  const global: Global
+  const global: Global;
 }
