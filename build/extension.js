@@ -173,7 +173,7 @@ var Log = (...items) => {
 var GLib = imports.gi.GLib;
 var Gtk = imports.gi.Gtk;
 var St = imports.gi.St;
-var Main2 = imports.ui.main;
+var Main = imports.ui.main;
 
 // src/extension.ts
 var import_classnames = __toESM(require_classnames());
@@ -271,7 +271,6 @@ var WorkspaceIndicator = class {
       child: new St.BoxLayout()
     });
     workspaceInd.connect("button-release-event", () => workspace.activate());
-    Main.panel[box].insert_child_at_index(workspaceIndicator, insertIndex);
     return workspaceInd;
   }
   // createIndicatorIcons(button, windows, index) {

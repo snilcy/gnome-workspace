@@ -9,8 +9,8 @@
     "copy": "cp -r ./src/{schemas,metadata.json} ./build/",
     "build:scss": "sass ./src/stylesheet.scss:./build/stylesheet.css --style=expanded",
     "watch:scss": "yarn build:scss --watch",
-    "build": "rm -rf build && yarn esbuild && yarn scss && yarn copy",
-    "watch": "concurrently -c auto --raw yarn:watch:*"
+    "build": "rm -rf build/* && concurrently --raw yarn:build:* yarn:copy",
+    "watch": "concurrently --raw yarn:watch:*"
   },
   "dependencies": {
     "@girs/gjs": "^3.2.0",

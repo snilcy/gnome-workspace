@@ -15,8 +15,6 @@ const l = new Logger('', {
   },
 })
 
-const lb = l.ns('Build')
-
 const callbackPlugin = {
   name: '@snilcy/callbacks',
   setup(build) {
@@ -72,7 +70,7 @@ const config = {
   bundle: true,
   treeShaking: false,
   outdir: './build/',
-  plugins: [callbackPlugin],
+  plugins: watch ? [callbackPlugin] : [],
   legalComments: 'none',
   // logLevel: 'verbose',
   // external: ['gi://*'],
