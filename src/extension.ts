@@ -3,8 +3,9 @@ import { WorkspaceManager } from './api/workspace-manager'
 import { WindowTracker } from './api/window-tracker'
 import { Log } from './utils'
 import { St } from './api'
-import type ISt from 'st-12'
 import { Workspace } from './api/workspace'
+import type ISt from 'st-12'
+import cl from 'classnames'
 
 // import { Display, Log, St, WorkspaceManager } from './api';
 // // import type { IStWidget } from './types/gnome-api/st';
@@ -16,7 +17,7 @@ function init() {
 }
 
 class WorkspaceIndicator {
-  workspacesIndicators: ISt.Bin[] = []
+  workspaceInds: ISt.Bin[] = []
   listeners: {
     target: { disconnect(handlerID: number): void }
     handlerIDs: number[]
@@ -30,7 +31,7 @@ class WorkspaceIndicator {
     // this._workspacesIndicators = [];
     // this._hasOtherMonitor = false;
     this.connectSignals()
-    this.refresh()
+    // this.refresh();
   }
 
   disable() {
@@ -45,8 +46,6 @@ class WorkspaceIndicator {
     this.disconnectSignals()
     this.refresh()
   }
-
-  addHandler = (signal: string) => () => this.refresh(signal)
 
   connectSignals() {
     this.listeners = [
@@ -94,7 +93,7 @@ class WorkspaceIndicator {
   }
 
   destroy() {
-    this.workspacesIndicators.forEach((bin) => bin.destroy())
+    this.workspaceInds.forEach((bin) => bin.destroy())
   }
 
   refresh(data?: string) {
@@ -112,19 +111,15 @@ class WorkspaceIndicator {
     //   this.createIndicatorButton(0, true);
     // }
 
-    this.workspacesIndicators = WorkspaceManager.workspaces.map(
-      this.getIndicatorButton,
-    )
+    this.workspaceInds = WorkspaceManager.workspaces.map(this.getWorkspaceInd)
   }
 
-  getIndicatorButton(workspace: Workspace) {
+  getWorkspaceInd(workspace: Workspace) {
     const windows = workspace.windows.filter(
       (w) =>
         // isOtherMonitor ? w.isOnSecondMonitor : !w.isOnSecondMonitor,
         w,
     )
-
-    const isActive = workspace.active
 
     // const showActiveWorkspaceIndicator = this._settings.get_boolean(
     //   'show-active-workspace-indicator',
@@ -133,11 +128,9 @@ class WorkspaceIndicator {
     //   'round-indicators-border',
     // );
 
-    const styles = ['workspace']
-
-    if (isActive) {
-      styles.push('active')
-    }
+    const styles = cl('workspace', {
+      active: workspace.active,
+    })
 
     // if (!showActiveWorkspaceIndicator) {
     //   styles += ' no-indicator';
@@ -148,9 +141,9 @@ class WorkspaceIndicator {
 
     // const indicatorsColor = this._settings.get_string('indicators-color');
 
-    return new St.Bin({
-      style_class: styles.join(' '),
-      style: `border-color: red`,
+    const workspaceInd = new St.Bin({
+      style_class: styles,
+      style: '',
       reactive: true,
       can_focus: true,
       track_hover: true,
@@ -171,10 +164,8 @@ class WorkspaceIndicator {
     //   return false;
     // };
 
-    // // switch to workspace on click
-    // workspaceIndicator.connect('button-release-event', () =>
-    //   workspace.activate(global.get_current_time()),
-    // );
+    // switch to workspace on click
+    workspaceInd.connect('button-release-event', () => workspace.activate())
 
     // // assign to "this" settings otherwise function triggered on connect can't access them
     // workspaceIndicator.scrollWrap =
@@ -223,7 +214,9 @@ class WorkspaceIndicator {
     // const insertIndex = isOtherMonitor
     //   ? 0
     //   : position + index + (this._hasOtherMonitor ? 1 : 0);
-    // Main.panel[box].insert_child_at_index(workspaceIndicator, insertIndex);
+    // Main.panel[box].insert_child_at_index(workspaceIndicator, insertIndex)
+
+    return workspaceInd
   }
 
   // createIndicatorIcons(button, windows, index) {

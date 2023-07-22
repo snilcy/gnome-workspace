@@ -1,3 +1,3 @@
 export const Log = (...items: any[]) => {
-  log(`SNILCY.N ==> ${items.join(' ')} <==`);
-};
+  log(`SNILCY.N ==> ${items.join(' ')} <==`)
+}

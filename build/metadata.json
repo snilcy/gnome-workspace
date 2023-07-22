@@ -1,7 +1,0 @@
-{
-  "name": "Workspace Gnome (Snilcy )",
-  "description": "Display a simple workspace",
-  "uuid": "workspace@snilcy.github.io",
-  "version": 1,
-  "shell-version": ["44"]
-}

@@ -11,4 +11,8 @@ export class Workspace {
   get active() {
     return this.gWorkspace.active
   }
+
+  activate() {
+    this.gWorkspace.activate(global.get_current_time())
+  }
 }

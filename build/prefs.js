@@ -2,6 +2,7 @@
 var GLib = imports.gi.GLib;
 var Gtk = imports.gi.Gtk;
 var St = imports.gi.St;
+var Main = imports.ui.main;
 
 // src/utils.ts
 var Log = (...items) => {

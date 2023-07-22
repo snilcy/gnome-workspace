@@ -1,14 +1,14 @@
-import { Gtk } from './api';
-import { Log } from './utils';
+import { Gtk } from './api'
+import { Log } from './utils'
 
 function init() {
-  Log('Prefs.init');
+  Log('Prefs.init')
 }
 
 // This function is called when the preferences window is first created to build
 // // and return a Gtk widget. As an example we'll create and return a GtkLabel.
 function buildPrefsWidget() {
-  Log('Prefs.buildPrefsWidget');
+  Log('Prefs.buildPrefsWidget')
 
   // const settings = imports.misc.extensionUtils.getSettings(
   //   'org.gnome.shell.extensions.workspaces-indicator-by-open-apps',
@@ -17,16 +17,16 @@ function buildPrefsWidget() {
   // Create a parent container widget that is auto-centered
   const prefsWidget = new Gtk.CenterBox({
     visible: true,
-  });
+  })
 
   // Put contents in a Table-like grid
   const gridWidget = new Gtk.Grid({
     column_spacing: 80,
     row_spacing: 12,
     visible: true,
-  });
+  })
 
-  prefsWidget.set_center_widget(gridWidget);
+  prefsWidget.set_center_widget(gridWidget)
 
   // -------- SETTINGS --------
 
@@ -320,5 +320,5 @@ function buildPrefsWidget() {
   // });
   // gridWidget.attach(issue, 0, 16, 2, 1);
 
-  return prefsWidget;
+  return prefsWidget
 }

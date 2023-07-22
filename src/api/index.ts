@@ -1,6 +1,7 @@
 export const GLib = imports.gi.GLib
 export const Gtk = imports.gi.Gtk
 export const St = imports.gi.St
+export const Main = imports.ui.main
 
 // const { gi: GI, ui: UI, misc: Misc, gettext: Gettext, cairo: Cairo } = imports;
 // const { workspace_manager: WorkspaceManager, display: Display } = global;

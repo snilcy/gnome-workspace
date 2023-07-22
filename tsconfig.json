@@ -27,8 +27,9 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "allowJs": true,
-    "importHelpers": true
+    "importHelpers": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["@types/Gjs/*.d.ts", "./src/api/types.d.ts", "./src/**/*.ts"],
+  "include": ["./src/api/types.d.ts", "./src/**/*.ts"],
   "exclude": ["node_modules"]
 }

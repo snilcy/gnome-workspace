@@ -1,3 +1,80 @@
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function __require() {
+  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+
+// node_modules/classnames/index.js
+var require_classnames = __commonJS({
+  "node_modules/classnames/index.js"(exports, module) {
+    (function() {
+      "use strict";
+      var hasOwn = {}.hasOwnProperty;
+      var nativeCodeString = "[native code]";
+      function classNames() {
+        var classes = [];
+        for (var i = 0; i < arguments.length; i++) {
+          var arg = arguments[i];
+          if (!arg)
+            continue;
+          var argType = typeof arg;
+          if (argType === "string" || argType === "number") {
+            classes.push(arg);
+          } else if (Array.isArray(arg)) {
+            if (arg.length) {
+              var inner = classNames.apply(null, arg);
+              if (inner) {
+                classes.push(inner);
+              }
+            }
+          } else if (argType === "object") {
+            if (arg.toString !== Object.prototype.toString && !arg.toString.toString().includes("[native code]")) {
+              classes.push(arg.toString());
+              continue;
+            }
+            for (var key in arg) {
+              if (hasOwn.call(arg, key) && arg[key]) {
+                classes.push(key);
+              }
+            }
+          }
+        }
+        return classes.join(" ");
+      }
+      if (typeof module !== "undefined" && module.exports) {
+        classNames.default = classNames;
+        module.exports = classNames;
+      } else if (typeof define === "function" && typeof define.amd === "object" && define.amd) {
+        define("classnames", [], function() {
+          return classNames;
+        });
+      } else {
+        window.classNames = classNames;
+      }
+    })();
+  }
+});
+
 // src/api/display.ts
 var { display: gDisplay } = global;
 var connect = (...args) => {
@@ -30,6 +107,9 @@ var Workspace = class {
   }
   get active() {
     return this.gWorkspace.active;
+  }
+  activate() {
+    this.gWorkspace.activate(global.get_current_time());
   }
 };
 
@@ -93,17 +173,18 @@ var Log = (...items) => {
 var GLib = imports.gi.GLib;
 var Gtk = imports.gi.Gtk;
 var St = imports.gi.St;
+var Main2 = imports.ui.main;
 
 // src/extension.ts
+var import_classnames = __toESM(require_classnames());
 function init() {
   Log("WorkspaceIndicator.init");
   return new WorkspaceIndicator();
 }
 var WorkspaceIndicator = class {
   constructor() {
-    this.workspacesIndicators = [];
+    this.workspaceInds = [];
     this.listeners = [];
-    this.addHandler = (signal) => () => this.refresh(signal);
   }
   enable() {
     Log("WorkspaceIndicator.enable");
@@ -112,6 +193,7 @@ var WorkspaceIndicator = class {
   disable() {
     Log("WorkspaceIndicator.disable");
     this.disconnectSignals();
+    this.refresh();
   }
   connectSignals() {
     this.listeners = [
@@ -163,35 +245,34 @@ var WorkspaceIndicator = class {
     });
   }
   destroy() {
-    this.workspacesIndicators.forEach((bin) => bin.destroy());
+    this.workspaceInds.forEach((bin) => bin.destroy());
   }
   refresh(data) {
     Log("SIGNAL", data, WorkspaceManager.length);
     this.destroy();
-    this.workspacesIndicators = WorkspaceManager.workspaces.map(
-      this.getIndicatorButton
-    );
+    this.workspaceInds = WorkspaceManager.workspaces.map(this.getWorkspaceInd);
   }
-  getIndicatorButton(workspace) {
+  getWorkspaceInd(workspace) {
     const windows = workspace.windows.filter(
       (w) => (
         // isOtherMonitor ? w.isOnSecondMonitor : !w.isOnSecondMonitor,
         w
       )
     );
-    const isActive = workspace.active;
-    const styles = ["workspace"];
-    if (isActive) {
-      styles.push("active");
-    }
-    return new St.Bin({
-      style_class: styles.join(" "),
-      style: `border-color: red`,
+    const styles = (0, import_classnames.default)("workspace", {
+      active: workspace.active
+    });
+    const workspaceInd = new St.Bin({
+      style_class: styles,
+      style: "",
       reactive: true,
       can_focus: true,
       track_hover: true,
       child: new St.BoxLayout()
     });
+    workspaceInd.connect("button-release-event", () => workspace.activate());
+    Main.panel[box].insert_child_at_index(workspaceIndicator, insertIndex);
+    return workspaceInd;
   }
   // createIndicatorIcons(button, windows, index) {
   //   // windows

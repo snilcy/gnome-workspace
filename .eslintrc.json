@@ -1,4 +1,8 @@
 {
+  "ignorePatterns": [
+    "node_modules/*",
+    "build/*"
+  ],
   "globals": {
     "imports": true,
     "global": true,
