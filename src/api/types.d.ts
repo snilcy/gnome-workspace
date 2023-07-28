@@ -1,5 +1,6 @@
 import type { Meta } from '@girs/meta-12'
 import type { Shell } from '@girs/shell-12'
+import type { St } from '@girs/st-12'
 import type { ui as gui, misc } from '@girs/gnome-shell'
 
 export class Panel {

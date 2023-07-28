@@ -1,23 +1,30 @@
-import { Display } from './api/display'
-import { WorkspaceManager } from './api/workspace-manager'
-import { WindowTracker } from './api/window-tracker'
-import { Log } from './utils'
-import { St } from './api'
-import { Workspace } from './api/workspace'
-import type ISt from 'st-12'
 import cl from 'classnames'
+
+import { Log } from './utils'
+import {
+  Display,
+  WorkspaceManager,
+  WindowTracker,
+  Workspace,
+  Panel,
+  Widget,
+  St,
+} from './api'
+import type ISt from '@girs/st-12'
+import { WidgetButton } from './api/widget-button'
 
 // import { Display, Log, St, WorkspaceManager } from './api';
 // // import type { IStWidget } from './types/gnome-api/st';
 
 // initialize extension
-function init() {
-  Log('WorkspaceIndicator.init')
+function init(meta: any) {
+  Log('WorkspaceIndicator.init', meta)
   return new WorkspaceIndicator()
 }
 
 class WorkspaceIndicator {
-  workspaceInds: ISt.Bin[] = []
+  container = new Widget()
+
   listeners: {
     target: { disconnect(handlerID: number): void }
     handlerIDs: number[]
@@ -25,26 +32,47 @@ class WorkspaceIndicator {
 
   enable() {
     Log('WorkspaceIndicator.enable')
+    this.connectSignals()
+    this.container.destroy()
+    this.container = new Widget()
+    this.refresh()
+    Panel.centerBox.appendChildren(this.container)
+
+    // this.box = new St.Bin({
+    //   child: new St.Label({
+    //     text: 'Meow',
+    //   }),
+    // })
+
+    // Log(this.box)
+    // imports.ui.main.panel._centerBox.insert_child_at_index(this.box, 0)
+
+    // this.refresh()
+    // Log('imports.ui.main.panel._centerBox', imports.ui.main.panel._centerBox)
+    // Log('Panel.centerBox', Panel.centerBox.container)
+    // Log(
+    //   'Panels',
+    //   Panel.centerBox.container === imports.ui.main.panel._centerBox,
+    // )
+
+    // Panel.centerBox.appendChildren(this.box)
+
     // this._settings = imports.misc.extensionUtils.getSettings(
     //   'org.gnome.shell.extensions.workspace-gnome',
     // );
-    // this._workspacesIndicators = [];
-    // this._hasOtherMonitor = false;
-    this.connectSignals()
-    // this.refresh();
   }
 
   disable() {
     Log('WorkspaceIndicator.disable')
-
-    // this._settings = {};
-
-    // this._workspacesIndicators.splice(0).forEach((i) => i.destroy());
-    // this._workspacesIndicators = [];
-    // this._hasOtherMonitor = null;
-
+    try {
+      if (this.container && this.container.destroy) {
+        this.container.destroy()
+      }
+    } catch (err) {
+      Log(err)
+    }
     this.disconnectSignals()
-    this.refresh()
+    // this.container.destroy()
   }
 
   connectSignals() {
@@ -66,21 +94,21 @@ class WorkspaceIndicator {
       {
         target: Display,
         handlerIDs: [
-          Display.connect('restacked', () => this.refresh('Display.restacked')),
-          Display.connect('window-left-monitor', () =>
-            this.refresh('Display.window-left-monitor'),
-          ),
-          Display.connect('window-entered-monitor', () =>
-            this.refresh('Display.window-entered-monitor'),
-          ),
+          // Display.connect('restacked', () => this.refresh('Display.restacked')),
+          // Display.connect('window-left-monitor', () =>
+          //   this.refresh('Display.window-left-monitor'),
+          // ),
+          // Display.connect('window-entered-monitor', () =>
+          //   this.refresh('Display.window-entered-monitor'),
+          // ),
         ],
       },
       {
         target: WindowTracker,
         handlerIDs: [
-          WindowTracker.connect('tracked-windows-changed', () =>
-            this.refresh('WindowTracker.tracked-windows-changed'),
-          ),
+          // WindowTracker.connect('tracked-windows-changed', () =>
+          //   this.refresh('WindowTracker.tracked-windows-changed'),
+          // ),
         ],
       },
     ]
@@ -92,63 +120,34 @@ class WorkspaceIndicator {
     })
   }
 
-  destroy() {
-    this.workspaceInds.forEach((bin) => bin.destroy())
-  }
-
   refresh(data?: string) {
     Log('SIGNAL', data, WorkspaceManager.length)
-    this.destroy()
 
-    // check if apps on all workspaces (other monitor)
-    // const windows = global.workspace_manager
-    //   .get_workspace_by_index(0)
-    //   .list_windows()
-    //   .filter((w) => w.is_on_all_workspaces());
+    const workspaceInds = WorkspaceManager.workspaces.map(this.getWindowsInds)
 
-    // if (windows && windows.length > 0) {
-    //   this._hasOtherMonitor = true;
-    //   this.createIndicatorButton(0, true);
-    // }
-
-    this.workspaceInds = WorkspaceManager.workspaces.map(this.getWorkspaceInd)
+    this.container.destroyChildrens()
+    this.container.appendChildrens(workspaceInds)
   }
 
-  getWorkspaceInd(workspace: Workspace) {
-    const windows = workspace.windows.filter(
-      (w) =>
-        // isOtherMonitor ? w.isOnSecondMonitor : !w.isOnSecondMonitor,
-        w,
-    )
+  getWindowsInds(workspace: Workspace) {
+    const windows = workspace.windows
+      .filter((window) => !window.isOnSecondMonitor)
+      .map((window) => {
+        const icon = window.getIcon(20)
+        icon.onClick(() => {
+          Log('window.onClick', window.class)
+          window.activate()
+        })
+        return icon
+      })
 
-    // const showActiveWorkspaceIndicator = this._settings.get_boolean(
-    //   'show-active-workspace-indicator',
-    // );
-    // const roundIndicatorsBorder = this._settings.get_boolean(
-    //   'round-indicators-border',
-    // );
+    // const styles = cl('workspace', {
+    //   active: workspace.active,
+    // })
 
-    const styles = cl('workspace', {
-      active: workspace.active,
-    })
-
-    // if (!showActiveWorkspaceIndicator) {
-    //   styles += ' no-indicator';
-    // }
-    // if (!roundIndicatorsBorder) {
-    //   styles += ' no-rounded';
-    // }
-
-    // const indicatorsColor = this._settings.get_string('indicators-color');
-
-    const workspaceInd = new St.Bin({
-      style_class: styles,
-      style: '',
-      reactive: true,
-      can_focus: true,
-      track_hover: true,
-      child: new St.BoxLayout(),
-    })
+    const windowsWidget = new Widget()
+    windowsWidget.appendChildrens(windows)
+    return windowsWidget
 
     // // drag and drop
     // workspaceIndicator._delegate = workspaceIndicator;
@@ -165,7 +164,7 @@ class WorkspaceIndicator {
     // };
 
     // switch to workspace on click
-    workspaceInd.connect('button-release-event', () => workspace.activate())
+    // workspaceInd.connect('button-release-event', () => workspace.activate())
 
     // // assign to "this" settings otherwise function triggered on connect can't access them
     // workspaceIndicator.scrollWrap =
@@ -215,8 +214,6 @@ class WorkspaceIndicator {
     //   ? 0
     //   : position + index + (this._hasOtherMonitor ? 1 : 0);
     // Main.panel[box].insert_child_at_index(workspaceIndicator, insertIndex)
-
-    return workspaceInd
   }
 
   // createIndicatorIcons(button, windows, index) {

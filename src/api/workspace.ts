@@ -12,6 +12,10 @@ export class Workspace {
     return this.gWorkspace.active
   }
 
+  get index() {
+    return this.gWorkspace.index()
+  }
+
   activate() {
     this.gWorkspace.activate(global.get_current_time())
   }

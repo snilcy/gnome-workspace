@@ -1,6 +1,15 @@
+import { Widget } from './widget'
+
 const gPanel = imports.ui.main.panel
 
-gPanel._rightBox
+export enum PANEL_BOX_POSITION {
+  LEFT,
+  CENTER,
+  RIGTH,
+}
 
-// Main.panel[box].insert_child_at_index(workspaceIndicator, insertIndex)
-export const Panel = {}
+export const Panel = {
+  leftBox: new Widget({ container: () => gPanel._leftBox }),
+  centerBox: new Widget({ container: () => gPanel._centerBox }),
+  rightBox: new Widget({ container: () => gPanel._rightBox }),
+}

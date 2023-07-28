@@ -3,6 +3,15 @@ export const Gtk = imports.gi.Gtk
 export const St = imports.gi.St
 export const Main = imports.ui.main
 
+export * from './widget'
+export * from './panel'
+export * from './display'
+export * from './list'
+export * from './window'
+export * from './workspace'
+export * from './workspace-manager'
+export * from './window-tracker'
+
 // const { gi: GI, ui: UI, misc: Misc, gettext: Gettext, cairo: Cairo } = imports;
 // const { workspace_manager: WorkspaceManager, display: Display } = global;
 

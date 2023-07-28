@@ -25,16 +25,16 @@ const callbackPlugin = {
 
     build.onEnd((result) => {
       console.clear()
-      const { errors } = result
+      const { errors, warnings } = result
 
       const r = {
-        ...result,
         errors: errors.length,
+        warnings: warnings.length,
       }
 
       l.info('Rebuild', count++, r)
 
-      errors.forEach(({ location, text }) => {
+      errors.concat(warnings).forEach(({ location, text }) => {
         const result = codeFrameColumns(
           fs.readFileSync(location.file, 'utf-8'),
           {
@@ -72,8 +72,6 @@ const config = {
   outdir: './build/',
   plugins: watch ? [callbackPlugin] : [],
   legalComments: 'none',
-  // logLevel: 'verbose',
-  // external: ['gi://*'],
 }
 
 const main = async () => {

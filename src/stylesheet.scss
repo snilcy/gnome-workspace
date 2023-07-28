@@ -1,35 +1,40 @@
-.workspace {
-  margin: 0px 15px;
-}
+// .workspace {
+//   margin: 0px 15px;
+// }
 
-.workspace.active {
-  border-radius: 5px;
-  border: 2px solid white;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-}
+// .workspace.active {
+//   border-radius: 5px;
+//   border: 2px solid white;
+//   border-top: none;
+//   border-left: none;
+//   border-right: none;
+// }
 
-.text {
-  padding: 5px;
-  color: rgb(110, 110, 110);
-  font-size: 12px;
-}
+// .text {
+//   padding: 5px;
+//   color: rgb(110, 110, 110);
+//   font-size: 12px;
+// }
 
-.workspace.active .text,
-.workspace.active-no-indicator .text {
-  color: white;
-}
+// .workspace.active .text,
+// .workspace.active-no-indicator .text {
+//   color: white;
+// }
 
-.app.active {
-  border-top: 2px solid white;
-  border-radius: 5px;
-}
+// .app.active {
+//   border-top: 2px solid white;
+//   border-radius: 5px;
+// }
 
-.no-indicator {
-  border: none !important;
-}
+// .no-indicator {
+//   border: none !important;
+// }
 
-.no-rounded {
-  border-radius: 0px !important;
+// .no-rounded {
+//   border-radius: 0px !important;
+// }
+
+.WS__Icon {
+  opacity: 0.5;
+  border: 1px solid red;
 }
