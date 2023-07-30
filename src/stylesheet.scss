@@ -1,40 +1,46 @@
-// .workspace {
-//   margin: 0px 15px;
-// }
+@use "./theme.scss";
 
-// .workspace.active {
-//   border-radius: 5px;
-//   border: 2px solid white;
-//   border-top: none;
-//   border-left: none;
-//   border-right: none;
-// }
+$sumiInk4: #54546d;
+$sumiInk3: #363646;
+$springViolet2: #9cabca;
+$oniViolet: #957fb8;
 
-// .text {
-//   padding: 5px;
-//   color: rgb(110, 110, 110);
-//   font-size: 12px;
-// }
+$workspace-border-color: $sumiInk3;
 
-// .workspace.active .text,
-// .workspace.active-no-indicator .text {
-//   color: white;
-// }
+.#{uuid()} {
+  &__root {
+    border: 1px solid $workspace-border-color;
+    border-bottom: none;
+    border-top: none;
+    border-right: none;
+  }
 
-// .app.active {
-//   border-top: 2px solid white;
-//   border-radius: 5px;
-// }
+  &__icon {
+    padding: 0 5px;
 
-// .no-indicator {
-//   border: none !important;
-// }
+    &.active {
+      background-color: $sumiInk4;
 
-// .no-rounded {
-//   border-radius: 0px !important;
-// }
+      &.second {
+        background-color: $oniViolet;
+      }
+    }
+  }
 
-.WS__Icon {
-  opacity: 0.5;
-  border: 1px solid red;
+  &__workspace {
+    border: 1px solid $workspace-border-color;
+    border-bottom: none;
+    border-top: none;
+    border-left: none;
+
+    // padding: 0 3px;
+
+    &.active {
+      background-color: $workspace-border-color;
+    }
+
+    // &:first-child {
+    //   border-left: 1px solid $workspace-border-color;
+    // }
+  }
 }

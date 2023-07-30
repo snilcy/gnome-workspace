@@ -1,0 +1,5 @@
+{
+  "delay": 500,
+  "verbose": true,
+  "ext": "ts,scss"
+}

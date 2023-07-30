@@ -28,7 +28,8 @@
     "strictNullChecks": true,
     "allowJs": true,
     "importHelpers": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
   },
   "include": ["./src/api/types.d.ts", "./src/**/*.ts"],
   "exclude": ["node_modules"]

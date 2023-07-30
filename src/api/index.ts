@@ -3,6 +3,7 @@ export const Gtk = imports.gi.Gtk
 export const St = imports.gi.St
 export const Main = imports.ui.main
 
+export * from './config'
 export * from './widget'
 export * from './panel'
 export * from './display'

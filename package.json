@@ -10,7 +10,7 @@
     "build:scss": "sass ./src/stylesheet.scss:./build/stylesheet.css --style=expanded",
     "watch:scss": "yarn build:scss --watch",
     "build": "rm -rf build/* && concurrently --raw yarn:build:* yarn:copy",
-    "watch": "concurrently --raw yarn:watch:*"
+    "watch": "node ./build.mjs"
   },
   "dependencies": {
     "@girs/gjs": "^3.2.0",
@@ -32,6 +32,7 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^5.0.0-alpha.2",
     "minimist": "^1.2.8",
+    "nodemon": "^3.0.1",
     "prettier": "^3.0.0",
     "sass": "^1.63.6",
     "typescript": "^5.1.6"

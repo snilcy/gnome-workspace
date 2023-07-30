@@ -1,19 +1,12 @@
 import minimist from 'minimist'
 import esbuild from 'esbuild'
 import fs from 'node:fs'
-import { Logger } from '@snilcy/logger'
 import { codeFrameColumns } from '@babel/code-frame'
+import { logger } from './logger.mjs'
+const l = logger.ns('ESBUILD')
 
 const { watch } = minimist(process.argv.slice(2))
 
-const l = new Logger('', {
-  console: {
-    deep: 6,
-    undefined: false,
-    excludeKeys: [],
-    lineTerminators: true,
-  },
-})
 
 const callbackPlugin = {
   name: '@snilcy/callbacks',
@@ -24,7 +17,7 @@ const callbackPlugin = {
     })
 
     build.onEnd((result) => {
-      console.clear()
+      // console.clear()
       const { errors, warnings } = result
 
       const r = {
@@ -70,17 +63,8 @@ const config = {
   bundle: true,
   treeShaking: false,
   outdir: './build/',
-  plugins: watch ? [callbackPlugin] : [],
+  plugins: [callbackPlugin],
   legalComments: 'none',
 }
 
-const main = async () => {
-  if (watch) {
-    const ctx = await esbuild.context(config)
-    await ctx.watch()
-  } else {
-    await esbuild.build(config)
-  }
-}
-
-main()
+esbuild.build(config)

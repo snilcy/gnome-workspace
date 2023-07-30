@@ -1,21 +1,54 @@
+// src/api/config.ts
+var ConfigClass = class {
+  constructor() {
+    this.params = {
+      cssPrefix: ""
+    };
+  }
+  init(params) {
+    const cssPrefix = (params.cssPrefix || "").replace(/[^a-zA-Z-_]/gi, "-");
+    this.params = {
+      ...this.params,
+      ...params,
+      cssPrefix
+    };
+  }
+  getClassName(className) {
+    if (!className) {
+      return "";
+    }
+    return [this.params.cssPrefix, className].join("__");
+  }
+};
+var Config = new ConfigClass();
+
 // src/api/st.ts
 var St = imports.gi.St;
 
-// src/utils.ts
-var Log = (...items) => {
-  log(`SNILCY.N ==> ${items.join(" ")} <==`);
-};
+// src/api/clutter.ts
+var Clutter = imports.gi.Clutter;
 
 // src/api/widget.ts
 var DEFAULT_CONTAINER = St.BoxLayout;
 var Widget = class {
   constructor(params = {}) {
     this.params = {};
-    Log("Widget.constructor", params);
     this.params = params;
     if (params.onClick) {
       this.onClick(params.onClick);
     }
+    if (params.onMouseEnter) {
+      this.onMouseEnter(params.onMouseEnter);
+    }
+    if (params.onMouseLeave) {
+      this.onMouseLeave(params.onMouseLeave);
+    }
+  }
+  get className() {
+    return this.container.style_class;
+  }
+  set className(className) {
+    this.container.style_class = className ? Config.getClassName(className) : null;
   }
   get container() {
     if (this.containerWidget) {
@@ -24,7 +57,12 @@ var Widget = class {
     if (this.params.container) {
       this.containerWidget = typeof this.params.container === "function" ? this.params.container() : this.params.container;
     } else {
-      this.containerWidget = new DEFAULT_CONTAINER();
+      this.containerWidget = new DEFAULT_CONTAINER({
+        reactive: true,
+        can_focus: true,
+        track_hover: true,
+        style_class: Config.getClassName(this.params.className || "")
+      });
     }
     if (this.params.children) {
       this.containerWidget.insert_child_at_index(
@@ -32,29 +70,30 @@ var Widget = class {
         0
       );
     }
+    if (this.params.gChildren) {
+      this.containerWidget.insert_child_at_index(this.params.gChildren, 0);
+    }
     return this.containerWidget;
   }
   appendChildren(widget, index = -1) {
-    Log("Widget.appendChildren", widget);
-    Log(this.container);
     this.container.insert_child_at_index(widget.container, index);
   }
   appendChildrens(childs) {
-    Log("Widget.appendChildrens", childs.length);
     childs.forEach((child) => this.appendChildren(child));
   }
   destroyChildrens() {
-    Log("Widget.destroyChildrens");
     this.container.destroy_all_children();
   }
   destroy() {
-    Log("Widget.destroy", this.container);
     try {
       if (this.container) {
         this.container.destroy();
       }
     } catch (e) {
     }
+  }
+  set opacity(value) {
+    this.container.opacity = 255 * value;
   }
   onClick(handler) {
     this.container.connect(
@@ -63,6 +102,25 @@ var Widget = class {
         handler(event);
       }
     );
+  }
+  onMouseEnter(handler) {
+    this.container.connect("enter-event", (actor, event) => {
+      handler(this, event);
+    });
+  }
+  onMouseLeave(handler) {
+    this.container.connect("leave-event", (actor, event) => {
+      handler(this, event);
+    });
+  }
+  addEffect(effect) {
+    switch (effect) {
+      case "desaturate":
+        this.container.add_effect(new Clutter.DesaturateEffect());
+        break;
+      default:
+        break;
+    }
   }
 };
 
@@ -115,8 +173,9 @@ var List = class {
 
 // src/api/window.ts
 var Window = class {
-  constructor(gWindow) {
+  constructor(gWindow, workspace) {
     this.gWindow = gWindow;
+    this.workspace = workspace;
     this.gWindowTracker = imports.gi.Shell.WindowTracker.get_default();
     this.app = this.gWindowTracker.get_window_app(this.gWindow);
   }
@@ -145,22 +204,13 @@ var Window = class {
     return this.gWindow.get_description();
   }
   getIcon(size = 20) {
-    const icon = new St.Bin({
-      reactive: true,
-      can_focus: true,
-      track_hover: true,
-      style_class: "WS__Icon",
-      child: imports.gi.Shell.WindowTracker.get_default().get_window_app(this.gWindow).create_icon_texture(size)
+    const icon = new Widget({
+      gChildren: imports.gi.Shell.WindowTracker.get_default().get_window_app(this.gWindow).create_icon_texture(size)
     });
-    icon.connect("enter-event", () => {
-      icon.opacity = 255 * 0.7;
-    });
-    icon.connect("leave-event", () => {
-      icon.opacity = 255 * 1;
-    });
-    return new Widget({
-      container: () => icon
-    });
+    return icon;
+  }
+  get active() {
+    return this.gWindow.has_focus();
   }
   activate() {
     this.gWindow.activate(global.get_current_time());
@@ -174,12 +224,12 @@ var Window = class {
 };
 
 // src/api/workspace.ts
-var Workspace = class {
+var Workspace2 = class {
   constructor(gWorkspace) {
     this.gWorkspace = gWorkspace;
   }
   get windows() {
-    return this.gWorkspace.list_windows().map((gWindow) => new Window(gWindow));
+    return this.gWorkspace.list_windows().map((gWindow) => new Window(gWindow, this));
   }
   get active() {
     return this.gWorkspace.active;
@@ -216,7 +266,7 @@ var WorkspaceManager = {
   getWorkspaceById(id) {
     const gWorkspace = gWrokspaceManager.get_workspace_by_index(id);
     if (gWorkspace) {
-      return new Workspace(gWorkspace);
+      return new Workspace2(gWorkspace);
     }
     return null;
   },
@@ -249,12 +299,17 @@ var Gtk = imports.gi.Gtk;
 var St2 = imports.gi.St;
 var Main = imports.ui.main;
 
+// src/utils.ts
+var Log2 = (...items) => {
+  log(`SNILCY.N ==> ${items.join(" ")} <==`);
+};
+
 // src/prefs.ts
 function init() {
-  Log("Prefs.init");
+  Log2("Prefs.init");
 }
 function buildPrefsWidget() {
-  Log("Prefs.buildPrefsWidget");
+  Log2("Prefs.buildPrefsWidget");
   const prefsWidget = new Gtk.CenterBox({
     visible: true
   });

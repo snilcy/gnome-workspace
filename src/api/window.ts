@@ -2,12 +2,16 @@ import type Meta from '@girs/meta-12'
 import type Shell from '@girs/shell-12'
 import { Widget } from './widget'
 import { St } from './st'
+import { Config, Workspace } from '.'
 
 export class Window {
   gWindowTracker = imports.gi.Shell.WindowTracker.get_default()
   app: Shell.App
 
-  constructor(private gWindow: Meta.Window) {
+  constructor(
+    private gWindow: Meta.Window,
+    public workspace: Workspace,
+  ) {
     this.app = this.gWindowTracker.get_window_app(this.gWindow)
   }
 
@@ -44,27 +48,17 @@ export class Window {
   }
 
   getIcon(size: number = 20) {
-    const icon = new St.Bin({
-      reactive: true,
-      can_focus: true,
-      track_hover: true,
-      style_class: 'WS__Icon',
-      child: imports.gi.Shell.WindowTracker.get_default()
+    const icon = new Widget({
+      gChildren: imports.gi.Shell.WindowTracker.get_default()
         .get_window_app(this.gWindow)
         .create_icon_texture(size),
     })
 
-    icon.connect('enter-event', () => {
-      icon.opacity = 255 * 0.7
-    })
+    return icon
+  }
 
-    icon.connect('leave-event', () => {
-      icon.opacity = 255 * 1
-    })
-
-    return new Widget({
-      container: () => icon,
-    })
+  get active() {
+    return this.gWindow.has_focus()
   }
 
   activate() {

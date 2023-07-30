@@ -1,6 +1,42 @@
-.WS__Icon {
-  opacity: 0.5;
-  border: 1px solid red;
+.panel-button,
+.panel-button StIcona {
+  color: #dcd7ba;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-/*# sourceMappingURL=stylesheet.css.map */
+#panel {
+  background-color: rgba(42, 42, 55, 0.9019607843);
+  height: 28px;
+  border-bottom: 1 px solid violet;
+  box-shadow: -1px 5px 10px 0px rgba(0, 0, 0, 0.1254901961);
+}
+
+stage {
+  font-family: "Segoe UI Variable Static Text";
+}
+
+.workspace-snilcy-github-io__root {
+  border: 1px solid #363646;
+  border-bottom: none;
+  border-top: none;
+  border-right: none;
+}
+.workspace-snilcy-github-io__icon {
+  padding: 0 5px;
+}
+.workspace-snilcy-github-io__icon.active {
+  background-color: #54546d;
+}
+.workspace-snilcy-github-io__icon.active.second {
+  background-color: #957fb8;
+}
+.workspace-snilcy-github-io__workspace {
+  border: 1px solid #363646;
+  border-bottom: none;
+  border-top: none;
+  border-left: none;
+}
+.workspace-snilcy-github-io__workspace.active {
+  background-color: #363646;
+}

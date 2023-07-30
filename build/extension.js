@@ -1,21 +1,136 @@
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function __require() {
+  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+
+// node_modules/classnames/index.js
+var require_classnames = __commonJS({
+  "node_modules/classnames/index.js"(exports, module) {
+    (function() {
+      "use strict";
+      var hasOwn = {}.hasOwnProperty;
+      var nativeCodeString = "[native code]";
+      function classNames() {
+        var classes = [];
+        for (var i = 0; i < arguments.length; i++) {
+          var arg = arguments[i];
+          if (!arg)
+            continue;
+          var argType = typeof arg;
+          if (argType === "string" || argType === "number") {
+            classes.push(arg);
+          } else if (Array.isArray(arg)) {
+            if (arg.length) {
+              var inner = classNames.apply(null, arg);
+              if (inner) {
+                classes.push(inner);
+              }
+            }
+          } else if (argType === "object") {
+            if (arg.toString !== Object.prototype.toString && !arg.toString.toString().includes("[native code]")) {
+              classes.push(arg.toString());
+              continue;
+            }
+            for (var key in arg) {
+              if (hasOwn.call(arg, key) && arg[key]) {
+                classes.push(key);
+              }
+            }
+          }
+        }
+        return classes.join(" ");
+      }
+      if (typeof module !== "undefined" && module.exports) {
+        classNames.default = classNames;
+        module.exports = classNames;
+      } else if (typeof define === "function" && typeof define.amd === "object" && define.amd) {
+        define("classnames", [], function() {
+          return classNames;
+        });
+      } else {
+        window.classNames = classNames;
+      }
+    })();
+  }
+});
+
 // src/utils.ts
 var Log = (...items) => {
   log(`SNILCY.N ==> ${items.join(" ")} <==`);
 };
 
+// src/api/config.ts
+var ConfigClass = class {
+  constructor() {
+    this.params = {
+      cssPrefix: ""
+    };
+  }
+  init(params) {
+    const cssPrefix = (params.cssPrefix || "").replace(/[^a-zA-Z-_]/gi, "-");
+    this.params = {
+      ...this.params,
+      ...params,
+      cssPrefix
+    };
+  }
+  getClassName(className) {
+    if (!className) {
+      return "";
+    }
+    return [this.params.cssPrefix, className].join("__");
+  }
+};
+var Config = new ConfigClass();
+
 // src/api/st.ts
 var St = imports.gi.St;
+
+// src/api/clutter.ts
+var Clutter = imports.gi.Clutter;
 
 // src/api/widget.ts
 var DEFAULT_CONTAINER = St.BoxLayout;
 var Widget = class {
   constructor(params = {}) {
     this.params = {};
-    Log("Widget.constructor", params);
     this.params = params;
     if (params.onClick) {
       this.onClick(params.onClick);
     }
+    if (params.onMouseEnter) {
+      this.onMouseEnter(params.onMouseEnter);
+    }
+    if (params.onMouseLeave) {
+      this.onMouseLeave(params.onMouseLeave);
+    }
+  }
+  get className() {
+    return this.container.style_class;
+  }
+  set className(className) {
+    this.container.style_class = className ? Config.getClassName(className) : null;
   }
   get container() {
     if (this.containerWidget) {
@@ -24,7 +139,12 @@ var Widget = class {
     if (this.params.container) {
       this.containerWidget = typeof this.params.container === "function" ? this.params.container() : this.params.container;
     } else {
-      this.containerWidget = new DEFAULT_CONTAINER();
+      this.containerWidget = new DEFAULT_CONTAINER({
+        reactive: true,
+        can_focus: true,
+        track_hover: true,
+        style_class: Config.getClassName(this.params.className || "")
+      });
     }
     if (this.params.children) {
       this.containerWidget.insert_child_at_index(
@@ -32,29 +152,30 @@ var Widget = class {
         0
       );
     }
+    if (this.params.gChildren) {
+      this.containerWidget.insert_child_at_index(this.params.gChildren, 0);
+    }
     return this.containerWidget;
   }
   appendChildren(widget, index = -1) {
-    Log("Widget.appendChildren", widget);
-    Log(this.container);
     this.container.insert_child_at_index(widget.container, index);
   }
   appendChildrens(childs) {
-    Log("Widget.appendChildrens", childs.length);
     childs.forEach((child) => this.appendChildren(child));
   }
   destroyChildrens() {
-    Log("Widget.destroyChildrens");
     this.container.destroy_all_children();
   }
   destroy() {
-    Log("Widget.destroy", this.container);
     try {
       if (this.container) {
         this.container.destroy();
       }
     } catch (e) {
     }
+  }
+  set opacity(value) {
+    this.container.opacity = 255 * value;
   }
   onClick(handler) {
     this.container.connect(
@@ -63,6 +184,25 @@ var Widget = class {
         handler(event);
       }
     );
+  }
+  onMouseEnter(handler) {
+    this.container.connect("enter-event", (actor, event) => {
+      handler(this, event);
+    });
+  }
+  onMouseLeave(handler) {
+    this.container.connect("leave-event", (actor, event) => {
+      handler(this, event);
+    });
+  }
+  addEffect(effect) {
+    switch (effect) {
+      case "desaturate":
+        this.container.add_effect(new Clutter.DesaturateEffect());
+        break;
+      default:
+        break;
+    }
   }
 };
 
@@ -115,8 +255,9 @@ var List = class {
 
 // src/api/window.ts
 var Window = class {
-  constructor(gWindow) {
+  constructor(gWindow, workspace) {
     this.gWindow = gWindow;
+    this.workspace = workspace;
     this.gWindowTracker = imports.gi.Shell.WindowTracker.get_default();
     this.app = this.gWindowTracker.get_window_app(this.gWindow);
   }
@@ -145,22 +286,13 @@ var Window = class {
     return this.gWindow.get_description();
   }
   getIcon(size = 20) {
-    const icon = new St.Bin({
-      reactive: true,
-      can_focus: true,
-      track_hover: true,
-      style_class: "WS__Icon",
-      child: imports.gi.Shell.WindowTracker.get_default().get_window_app(this.gWindow).create_icon_texture(size)
+    const icon = new Widget({
+      gChildren: imports.gi.Shell.WindowTracker.get_default().get_window_app(this.gWindow).create_icon_texture(size)
     });
-    icon.connect("enter-event", () => {
-      icon.opacity = 255 * 0.7;
-    });
-    icon.connect("leave-event", () => {
-      icon.opacity = 255 * 1;
-    });
-    return new Widget({
-      container: () => icon
-    });
+    return icon;
+  }
+  get active() {
+    return this.gWindow.has_focus();
   }
   activate() {
     this.gWindow.activate(global.get_current_time());
@@ -174,12 +306,12 @@ var Window = class {
 };
 
 // src/api/workspace.ts
-var Workspace = class {
+var Workspace2 = class {
   constructor(gWorkspace) {
     this.gWorkspace = gWorkspace;
   }
   get windows() {
-    return this.gWorkspace.list_windows().map((gWindow) => new Window(gWindow));
+    return this.gWorkspace.list_windows().map((gWindow) => new Window(gWindow, this));
   }
   get active() {
     return this.gWorkspace.active;
@@ -216,7 +348,7 @@ var WorkspaceManager = {
   getWorkspaceById(id) {
     const gWorkspace = gWrokspaceManager.get_workspace_by_index(id);
     if (gWorkspace) {
-      return new Workspace(gWorkspace);
+      return new Workspace2(gWorkspace);
     }
     return null;
   },
@@ -249,7 +381,14 @@ var Gtk = imports.gi.Gtk;
 var St2 = imports.gi.St;
 var Main = imports.ui.main;
 
+// src/metadata.json
+var uuid = "workspace@snilcy.github.io";
+
 // src/extension.ts
+var import_classnames = __toESM(require_classnames());
+Config.init({
+  cssPrefix: uuid
+});
 function init(meta) {
   Log("WorkspaceIndicator.init", meta);
   return new WorkspaceIndicator();
@@ -263,9 +402,11 @@ var WorkspaceIndicator = class {
     Log("WorkspaceIndicator.enable");
     this.connectSignals();
     this.container.destroy();
-    this.container = new Widget();
+    this.container = new Widget({
+      className: "root"
+    });
     this.refresh();
-    Panel.centerBox.appendChildren(this.container);
+    Panel.leftBox.appendChildren(this.container, 0);
   }
   disable() {
     Log("WorkspaceIndicator.disable");
@@ -300,21 +441,24 @@ var WorkspaceIndicator = class {
       {
         target: Display,
         handlerIDs: [
-          // Display.connect('restacked', () => this.refresh('Display.restacked')),
-          // Display.connect('window-left-monitor', () =>
-          //   this.refresh('Display.window-left-monitor'),
-          // ),
-          // Display.connect('window-entered-monitor', () =>
-          //   this.refresh('Display.window-entered-monitor'),
-          // ),
+          Display.connect("restacked", () => this.refresh("Display.restacked")),
+          Display.connect(
+            "window-left-monitor",
+            () => this.refresh("Display.window-left-monitor")
+          ),
+          Display.connect(
+            "window-entered-monitor",
+            () => this.refresh("Display.window-entered-monitor")
+          )
         ]
       },
       {
         target: WindowTracker,
         handlerIDs: [
-          // WindowTracker.connect('tracked-windows-changed', () =>
-          //   this.refresh('WindowTracker.tracked-windows-changed'),
-          // ),
+          WindowTracker.connect(
+            "tracked-windows-changed",
+            () => this.refresh("WindowTracker.tracked-windows-changed")
+          )
         ]
       }
     ];
@@ -325,133 +469,68 @@ var WorkspaceIndicator = class {
     });
   }
   refresh(data) {
+    const activeWorkspace = WorkspaceManager.workspaces.find(
+      (workspace) => workspace.active
+    );
+    if (activeWorkspace) {
+      const activeWindow = activeWorkspace.windows.find(
+        (window2) => window2.active
+      );
+      Log("activeWindow", activeWindow?.title);
+    }
     Log("SIGNAL", data, WorkspaceManager.length);
-    const workspaceInds = WorkspaceManager.workspaces.map(this.getWindowsInds);
+    const secondMonitorWindows = WorkspaceManager.workspaces[0].windows.filter(
+      (window2) => window2.isOnSecondMonitor
+    );
+    const workspaceInds = WorkspaceManager.workspaces.filter(
+      (workspace) => workspace.windows.filter((window2) => !window2.isOnSecondMonitor).length
+    ).map(
+      (workspace) => this.getWorkspaceInd(
+        workspace.windows.filter((window2) => !window2.isOnSecondMonitor)
+      )
+    ).concat(this.getWorkspaceInd(secondMonitorWindows)).filter(Boolean);
     this.container.destroyChildrens();
     this.container.appendChildrens(workspaceInds);
   }
-  getWindowsInds(workspace) {
-    const windows = workspace.windows.filter((window) => !window.isOnSecondMonitor).map((window) => {
-      const icon = window.getIcon(20);
-      icon.onClick(() => {
-        Log("window.onClick", window.class);
-        window.activate();
+  getWorkspaceInd(windows) {
+    if (!windows.length) {
+      return;
+    }
+    const windowsWidgets = windows.sort((windowA, windowB) => {
+      if (windowA.isOnSecondMonitor) {
+        return 1;
+      }
+      if (windowB.isOnSecondMonitor) {
+        return -1;
+      }
+      return windowB.id - windowA.id;
+    }).map((window2) => {
+      const windowIcon = window2.getIcon(20);
+      const classNameDefalut = (0, import_classnames.default)("icon");
+      const classNameActive = (0, import_classnames.default)("icon", "active", {
+        second: window2.isOnSecondMonitor
       });
-      return icon;
+      windowIcon.className = window2.active ? classNameActive : classNameDefalut;
+      windowIcon.onClick(() => {
+        window2.activate();
+      });
+      windowIcon.onMouseEnter(() => {
+        windowIcon.className = classNameActive;
+      });
+      windowIcon.onMouseLeave(() => {
+        windowIcon.className = window2.active ? classNameActive : classNameDefalut;
+      });
+      if (!window2.workspace.active && !window2.active) {
+        windowIcon.opacity = 0.5;
+      }
+      return windowIcon;
     });
-    const windowsWidget = new Widget();
-    windowsWidget.appendChildrens(windows);
+    const windowsWidget = new Widget({
+      className: (0, import_classnames.default)("workspace", {
+        active: windows[0].workspace.active
+      })
+    });
+    windowsWidget.appendChildrens(windowsWidgets);
     return windowsWidget;
   }
-  // createIndicatorIcons(button, windows, index) {
-  //   // windows
-  //   //   .sort((w1, w2) => w1.get_id() - w2.get_id()) // sort by ids
-  //   //   .forEach((win) => {
-  //   //     // convert from Meta.window to Shell.app
-  //   //     const app = Shell.WindowTracker.get_default().get_window_app(win);
-  //   //     if (!app || !win) {
-  //   //       return;
-  //   //     }
-  //   //     // create Clutter.actor
-  //   //     const texture = app.create_icon_texture(20);
-  //   //     // set low opacity for not focused apps
-  //   //     const reduceInactiveAppsOpacity = this._settings.get_boolean(
-  //   //       'reduce-inactive-apps-opacity',
-  //   //     );
-  //   //     if (!win.has_focus() && reduceInactiveAppsOpacity) {
-  //   //       texture.set_opacity(150);
-  //   //     }
-  //   //     const desaturateApps = this._settings.get_boolean('desaturate-apps');
-  //   //     if (desaturateApps) {
-  //   //       texture.add_effect(new Clutter.DesaturateEffect());
-  //   //     }
-  //   //     // create container (with texture as child)
-  //   //     const showFocusedAppIndicator = this._settings.get_boolean(
-  //   //       'show-focused-app-indicator',
-  //   //     );
-  //   //     const roundIndicatorsBorder = this._settings.get_boolean(
-  //   //       'round-indicators-border',
-  //   //     );
-  //   //     let styles = 'app';
-  //   //     if (win.has_focus()) {
-  //   //       styles += ' active';
-  //   //     }
-  //   //     if (!showFocusedAppIndicator) {
-  //   //       styles += ' no-indicator';
-  //   //     }
-  //   //     if (!roundIndicatorsBorder) {
-  //   //       styles += ' no-rounded';
-  //   //     }
-  //   //     const indicatorsColor = this._settings.get_string('indicators-color');
-  //   //     const icon = new St.Bin({
-  //   //       style_class: styles,
-  //   //       style: `border-color: ${indicatorsColor}`,
-  //   //       reactive: true,
-  //   //       can_focus: true,
-  //   //       track_hover: true,
-  //   //       child: texture,
-  //   //     });
-  //   //     // focus application on click
-  //   //     icon.middleClosesApp = this._settings.get_boolean(
-  //   //       'middle-click-close-app',
-  //   //     );
-  //   //     icon.connect('button-release-event', this.clickApplication.bind(icon));
-  //   //     // drag and drop
-  //   //     icon._workspaceIndex = index;
-  //   //     icon._window = win;
-  //   //     icon._delegate = icon;
-  //   //     icon._draggable = dnd.makeDraggable(icon, {
-  //   //       dragActorOpacity: 150,
-  //   //     });
-  //   //     // add app Icon to buttons
-  //   //     button.get_child().add_child(icon);
-  //   //   });
-  // }
-  // createIndicatorLabel(button, index, otherMonitorText) {
-  //   // const txt = otherMonitorText ?? (index + 1).toString();
-  //   // button.get_child().insert_child_at_index(
-  //   //   new St.Label({
-  //   //     text: txt,
-  //   //     style_class: 'text',
-  //   //   }),
-  //   //   0,
-  //   // );
-  // }
-  // clickApplication(actor, event) {
-  //   // left/right click: focus application
-  //   // if (event.get_button() === 1 || event.get_button() === 3) {
-  //   //   this._window.activate(global.get_current_time());
-  //   // }
-  //   // // middle click: close application
-  //   // if (this.middleClosesApp && event.get_button() === 2) {
-  //   //   this._window.delete(global.get_current_time());
-  //   // }
-  // }
-  // scrollWorkspace(actor, event) {
-  //   const scrollDirection = event.get_scroll_direction();
-  //   let direction = 0;
-  //   switch (scrollDirection) {
-  //     case Clutter.ScrollDirection.LEFT:
-  //     case Clutter.ScrollDirection.UP:
-  //       direction = this.inverseScroll ? -1 : 1;
-  //       break;
-  //     case Clutter.ScrollDirection.RIGHT:
-  //     case Clutter.ScrollDirection.DOWN:
-  //       direction = this.inverseScroll ? 1 : -1;
-  //       break;
-  //     default:
-  //       return Clutter.EVENT_PROPAGATE;
-  //   }
-  //   const workspaceManager = global.workspace_manager;
-  //   let newIndex = workspaceManager.get_active_workspace_index() + direction;
-  //   // wrap
-  //   const wrap = this.scrollWrap;
-  //   if (wrap) newIndex = mod(newIndex, workspaceManager.n_workspaces);
-  //   if (newIndex >= 0 && newIndex < workspaceManager.n_workspaces) {
-  //     workspaceManager
-  //       .get_workspace_by_index(newIndex)
-  //       .activate(global.get_current_time());
-  //   }
-  //   // modulo working for negative numbers
-  // }
 };

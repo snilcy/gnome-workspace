@@ -5,7 +5,9 @@ export class Workspace {
   constructor(private gWorkspace: Meta.Workspace) {}
 
   get windows() {
-    return this.gWorkspace.list_windows().map((gWindow) => new Window(gWindow))
+    return this.gWorkspace
+      .list_windows()
+      .map((gWindow) => new Window(gWindow, this))
   }
 
   get active() {
