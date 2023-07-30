@@ -1,19 +1,20 @@
 import { St } from './st'
-import { Widget } from '.'
+import { Widget, IWidgetParams } from '.'
 import type { Clutter } from '@girs/clutter-12'
 import { Log } from 'src/utils'
 
 interface IWidgetButtonParams {
   label?: any
-  children?: Widget
 }
 
 export class WidgetButton extends Widget {
-  constructor(params: IWidgetButtonParams) {
+  constructor(params: IWidgetButtonParams & IWidgetParams) {
     super({
-      container: () =>
+      ...params,
+      container: ({ style_class }) =>
         new St.Button({
           label: String(params.label),
+          style_class,
         }),
     })
   }

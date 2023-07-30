@@ -55,7 +55,9 @@ var Widget = class {
       return this.containerWidget;
     }
     if (this.params.container) {
-      this.containerWidget = typeof this.params.container === "function" ? this.params.container() : this.params.container;
+      this.containerWidget = typeof this.params.container === "function" ? this.params.container({
+        style_class: Config.getClassName(this.params.className || "")
+      }) : this.params.container;
     } else {
       this.containerWidget = new DEFAULT_CONTAINER({
         reactive: true,

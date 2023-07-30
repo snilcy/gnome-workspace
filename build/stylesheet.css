@@ -24,6 +24,7 @@ stage {
 }
 .workspace-snilcy-github-io__icon {
   padding: 0 5px;
+  width: 20px;
 }
 .workspace-snilcy-github-io__icon.active {
   background-color: #54546d;

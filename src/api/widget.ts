@@ -5,7 +5,7 @@ import { Log } from 'src/utils'
 import { Config } from '.'
 import { Clutter } from './clutter'
 
-type IWidgetContainer = () => ISt.Widget
+type IWidgetContainer = (params: { style_class: string | null }) => ISt.Widget
 
 type IOnClickHandler = (event: IClutter.ButtonEvent) => void
 
@@ -21,7 +21,7 @@ type IOnMouseLeaveHanlder = (
   event: IClutter.CrossingEvent,
 ) => void
 
-interface IWidgetParams {
+export interface IWidgetParams {
   onClick?: IOnClickHandler
   onMouseEnter?: IOnMouseEnterHanlder
   onMouseLeave?: IOnMouseLeaveHanlder
@@ -72,7 +72,9 @@ export class Widget {
     if (this.params.container) {
       this.containerWidget =
         typeof this.params.container === 'function'
-          ? this.params.container()
+          ? this.params.container({
+              style_class: Config.getClassName(this.params.className || ''),
+            })
           : this.params.container
     } else {
       this.containerWidget = new DEFAULT_CONTAINER({

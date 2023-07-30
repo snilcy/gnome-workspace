@@ -137,7 +137,9 @@ var Widget = class {
       return this.containerWidget;
     }
     if (this.params.container) {
-      this.containerWidget = typeof this.params.container === "function" ? this.params.container() : this.params.container;
+      this.containerWidget = typeof this.params.container === "function" ? this.params.container({
+        style_class: Config.getClassName(this.params.className || "")
+      }) : this.params.container;
     } else {
       this.containerWidget = new DEFAULT_CONTAINER({
         reactive: true,
@@ -381,6 +383,19 @@ var Gtk = imports.gi.Gtk;
 var St2 = imports.gi.St;
 var Main = imports.ui.main;
 
+// src/api/widget-button.ts
+var WidgetButton = class extends Widget {
+  constructor(params) {
+    super({
+      ...params,
+      container: ({ style_class }) => new St.Button({
+        label: String(params.label),
+        style_class
+      })
+    });
+  }
+};
+
 // src/metadata.json
 var uuid = "workspace@snilcy.github.io";
 
@@ -476,26 +491,20 @@ var WorkspaceIndicator = class {
       const activeWindow = activeWorkspace.windows.find(
         (window2) => window2.active
       );
-      Log("activeWindow", activeWindow?.title);
     }
-    Log("SIGNAL", data, WorkspaceManager.length);
     const secondMonitorWindows = WorkspaceManager.workspaces[0].windows.filter(
       (window2) => window2.isOnSecondMonitor
     );
-    const workspaceInds = WorkspaceManager.workspaces.filter(
-      (workspace) => workspace.windows.filter((window2) => !window2.isOnSecondMonitor).length
-    ).map(
+    const workspaceInds = WorkspaceManager.workspaces.map(
       (workspace) => this.getWorkspaceInd(
-        workspace.windows.filter((window2) => !window2.isOnSecondMonitor)
+        workspace.windows.filter((window2) => !window2.isOnSecondMonitor),
+        workspace
       )
     ).concat(this.getWorkspaceInd(secondMonitorWindows)).filter(Boolean);
     this.container.destroyChildrens();
     this.container.appendChildrens(workspaceInds);
   }
-  getWorkspaceInd(windows) {
-    if (!windows.length) {
-      return;
-    }
+  getWorkspaceInd(windows, workspace) {
     const windowsWidgets = windows.sort((windowA, windowB) => {
       if (windowA.isOnSecondMonitor) {
         return 1;
@@ -527,10 +536,30 @@ var WorkspaceIndicator = class {
     });
     const windowsWidget = new Widget({
       className: (0, import_classnames.default)("workspace", {
-        active: windows[0].workspace.active
+        active: workspace?.active
       })
     });
-    windowsWidget.appendChildrens(windowsWidgets);
+    if (windowsWidgets.length) {
+      windowsWidget.appendChildrens(windowsWidgets);
+    } else {
+      const indexButton = new WidgetButton({
+        label: workspace ? workspace?.index + 1 : "S",
+        className: "icon",
+        onClick() {
+          workspace?.activate();
+        }
+      });
+      const classNameDefalut = (0, import_classnames.default)("icon");
+      const classNameActive = (0, import_classnames.default)("icon", "active");
+      indexButton.opacity = workspace?.active ? 1 : 0.5;
+      indexButton.onMouseEnter(() => {
+        indexButton.className = classNameActive;
+      });
+      indexButton.onMouseLeave(() => {
+        indexButton.className = workspace?.active ? classNameActive : classNameDefalut;
+      });
+      windowsWidget.appendChildren(indexButton);
+    }
     return windowsWidget;
   }
 };

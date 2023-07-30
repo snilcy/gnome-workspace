@@ -112,24 +112,25 @@ class WorkspaceIndicator {
         (window) => window.active,
       )
 
-      Log('activeWindow', activeWindow?.title)
+      // Log('activeWindow', activeWindow?.title)
     }
 
-    Log('SIGNAL', data, WorkspaceManager.length)
+    // Log('SIGNAL', data, WorkspaceManager.length)
 
     const secondMonitorWindows = WorkspaceManager.workspaces[0].windows.filter(
       (window) => window.isOnSecondMonitor,
     )
 
     const workspaceInds = WorkspaceManager.workspaces
-      .filter(
-        (workspace) =>
-          workspace.windows.filter((window) => !window.isOnSecondMonitor)
-            .length,
-      )
+      // .filter(
+      //   (workspace) =>
+      //     workspace.windows.filter((window) => !window.isOnSecondMonitor)
+      //       .length,
+      // )
       .map((workspace) =>
         this.getWorkspaceInd(
           workspace.windows.filter((window) => !window.isOnSecondMonitor),
+          workspace,
         ),
       )
       .concat(this.getWorkspaceInd(secondMonitorWindows))
@@ -139,11 +140,7 @@ class WorkspaceIndicator {
     this.container.appendChildrens(workspaceInds)
   }
 
-  getWorkspaceInd(windows: Window[]) {
-    if (!windows.length) {
-      return
-    }
-
+  getWorkspaceInd(windows: Window[], workspace?: Workspace) {
     const windowsWidgets = windows
       .sort((windowA, windowB) => {
         if (windowA.isOnSecondMonitor) {
@@ -191,10 +188,38 @@ class WorkspaceIndicator {
 
     const windowsWidget = new Widget({
       className: cl('workspace', {
-        active: windows[0].workspace.active,
+        active: workspace?.active,
       }),
     })
-    windowsWidget.appendChildrens(windowsWidgets)
+
+    if (windowsWidgets.length) {
+      windowsWidget.appendChildrens(windowsWidgets)
+    } else {
+      const indexButton = new WidgetButton({
+        label: workspace ? workspace?.index + 1 : 'S',
+        className: 'icon',
+        onClick() {
+          workspace?.activate()
+        },
+      })
+
+      const classNameDefalut = cl('icon')
+      const classNameActive = cl('icon', 'active')
+
+      indexButton.opacity = workspace?.active ? 1 : 0.5
+
+      indexButton.onMouseEnter(() => {
+        indexButton.className = classNameActive
+      })
+
+      indexButton.onMouseLeave(() => {
+        indexButton.className = workspace?.active
+          ? classNameActive
+          : classNameDefalut
+      })
+
+      windowsWidget.appendChildren(indexButton)
+    }
     return windowsWidget
   }
 }
