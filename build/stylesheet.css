@@ -32,6 +32,12 @@ stage {
 .workspace-snilcy-github-io__icon.active.second {
   background-color: #957fb8;
 }
+.workspace-snilcy-github-io__icon.index {
+  font-weight: 400;
+  color: #938aa9;
+  font-family: "Segoe UI Variable Static Text";
+  font-size: 13px;
+}
 .workspace-snilcy-github-io__workspace {
   border: 1px solid #363646;
   border-bottom: none;

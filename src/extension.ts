@@ -1,3 +1,6 @@
+// TODO: 1. Window state/workspace by params(class/instance/role)
+// TODO: 2. Unuse second monitor on switch workspace
+
 import cl from 'classnames'
 
 import { Log } from './utils'
@@ -195,18 +198,18 @@ class WorkspaceIndicator {
     if (windowsWidgets.length) {
       windowsWidget.appendChildrens(windowsWidgets)
     } else {
+      const classNameDefalut = cl('icon', 'index')
+      const classNameActive = cl(classNameDefalut, 'active')
+
       const indexButton = new WidgetButton({
         label: workspace ? workspace?.index + 1 : 'S',
-        className: 'icon',
+        className: classNameDefalut,
         onClick() {
           workspace?.activate()
         },
       })
 
-      const classNameDefalut = cl('icon')
-      const classNameActive = cl('icon', 'active')
-
-      indexButton.opacity = workspace?.active ? 1 : 0.5
+      // indexButton.opacity = workspace?.active ? 1 : 0.5
 
       indexButton.onMouseEnter(() => {
         indexButton.className = classNameActive

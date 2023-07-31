@@ -542,16 +542,15 @@ var WorkspaceIndicator = class {
     if (windowsWidgets.length) {
       windowsWidget.appendChildrens(windowsWidgets);
     } else {
+      const classNameDefalut = (0, import_classnames.default)("icon", "index");
+      const classNameActive = (0, import_classnames.default)(classNameDefalut, "active");
       const indexButton = new WidgetButton({
         label: workspace ? workspace?.index + 1 : "S",
-        className: "icon",
+        className: classNameDefalut,
         onClick() {
           workspace?.activate();
         }
       });
-      const classNameDefalut = (0, import_classnames.default)("icon");
-      const classNameActive = (0, import_classnames.default)("icon", "active");
-      indexButton.opacity = workspace?.active ? 1 : 0.5;
       indexButton.onMouseEnter(() => {
         indexButton.className = classNameActive;
       });

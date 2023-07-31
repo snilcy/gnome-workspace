@@ -2,6 +2,7 @@
 
 $sumiInk4: #54546d;
 $sumiInk3: #363646;
+$springViolet1: #938aa9;
 $springViolet2: #9cabca;
 $oniViolet: #957fb8;
 
@@ -25,6 +26,13 @@ $workspace-border-color: $sumiInk3;
       &.second {
         background-color: $oniViolet;
       }
+    }
+
+    &.index {
+      font-weight: 400;
+      color: $springViolet1;
+      font-family: "Segoe UI Variable Static Text";
+      font-size: 13px;
     }
   }
 
