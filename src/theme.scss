@@ -1,3 +1,9 @@
+$sumiInk4: #54546d;
+$sumiInk3: #363646;
+$springViolet1: #938aa9;
+$springViolet2: #9cabca;
+$oniViolet: #957fb8;
+
 .panel-button,
 .panel-button StIcona {
   color: #dcd7ba;
@@ -16,4 +22,24 @@
 
 stage {
   font-family: "Segoe UI Variable Static Text";
+}
+
+StBin.app-menu-icon {
+  width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+#appMenu .panel-status-menu-box {
+  padding: 0;
+  spacing: 0;
+}
+
+.panel-status-indicators-box,
+.panel-status-menu-box {
+  spacing: 0;
+
+  StLabel {
+    color: $springViolet1;
+  }
 }

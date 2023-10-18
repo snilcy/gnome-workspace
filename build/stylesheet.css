@@ -16,11 +16,32 @@ stage {
   font-family: "Segoe UI Variable Static Text";
 }
 
+StBin.app-menu-icon {
+  width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+#appMenu .panel-status-menu-box {
+  padding: 0;
+  spacing: 0;
+}
+
+.panel-status-indicators-box,
+.panel-status-menu-box {
+  spacing: 0;
+}
+.panel-status-indicators-box StLabel,
+.panel-status-menu-box StLabel {
+  color: #938aa9;
+}
+
 .workspace-snilcy-github-io__root {
   border: 1px solid #363646;
   border-bottom: none;
   border-top: none;
   border-right: none;
+  margin-right: 5px;
 }
 .workspace-snilcy-github-io__icon {
   padding: 0 5px;
